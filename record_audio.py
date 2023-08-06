@@ -16,6 +16,7 @@ CHANNELS = 1
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 audio_queue = queue.Queue()
+transcription_queue = queue.Queue()
 model = whisper.load_model("medium")
 
 def record_audio(q):
@@ -31,7 +32,7 @@ def record_audio(q):
             chunk_data += data
         q.put(chunk_data)
 
-def transcribe_audio(q, outputfile):
+def transcribe_audio(q, tq, outputfile):
     transcription_data = ""
     while True:
         chunk_data = q.get()
@@ -43,18 +44,22 @@ def transcribe_audio(q, outputfile):
 
         transcription_data += result['text']
         print(result['text'])
-        generate_llm_insights(transcription_data)
+        tq.put(transcription_data)
 
-def generate_llm_insights(transcription_data): 
-    prompt = f"""
-    Could you summarize the top five insights from the conversation below?
-    {transcription_data}
-    """
-    response = gptapi.generate_chat_response([
-        {"role": "user", "content": prompt},
-    ], model_name="gpt-4")
 
-    print(response)
+def generate_llm_insights(tq, context): 
+    while True:
+        transcription_data = tq.get()
+        prompt = f"""
+        Context: {context}
+        Could you summarize the top five insights from the conversation below?
+        {transcription_data}
+        """
+        response = gptapi.generate_chat_response([
+            {"role": "user", "content": prompt},
+        ], model_name="gpt-4")
+
+        print(response)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -64,11 +69,15 @@ if __name__ == "__main__":
     args = parser.parse_args().__dict__
     output_file: str = args.pop("output_file")
 
+    context = input("Please enter some context for the conversation: ")
+
     record_thread = threading.Thread(target=record_audio, args=(audio_queue,))
-    transcribe_thread = threading.Thread(target=transcribe_audio, args=(audio_queue, output_file))
+    transcribe_thread = threading.Thread(target=transcribe_audio, args=(audio_queue, transcription_queue, output_file))
+    llm_thread = threading.Thread(target=generate_llm_insights, args=(transcription_queue, context))
 
     record_thread.start()
     transcribe_thread.start()
+    llm_thread.start()
 
     try:
         while True:
