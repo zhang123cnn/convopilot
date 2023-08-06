@@ -1,18 +1,20 @@
-import sys
 import pyaudio
-import wave
 import time
 import threading
 import queue
 import whisper
+import numpy as np
 
-CHUNK_DURATION = 20
-RATE = 44100
+CHUNK_DURATION = 10
+RATE = 16000
 CHANNELS = 1
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 audio_queue = queue.Queue()
 model = whisper.load_model("small")
+
+#TODO
+# 1. Write transcription data to file.
 
 def record_audio(q):
     p = pyaudio.PyAudio()
@@ -21,26 +23,17 @@ def record_audio(q):
     print("Recording... Press Ctrl+C to stop.")
     
     while True:
-        frames = []
+        chunk_data = b''
         for _ in range(0, int(RATE / CHUNK * CHUNK_DURATION)):
             data = stream.read(CHUNK)
-            frames.append(data)
-        q.put(frames)
+            chunk_data += data
+        q.put(chunk_data)
 
 def save_audio(q):
-    file_num = 1
     while True:
-        frames = q.get()
-        filename = f"output_{file_num}.wav"
-        with wave.open(filename, 'wb') as wf:
-            wf.setnchannels(CHANNELS)
-            wf.setsampwidth(pyaudio.PyAudio().get_sample_size(FORMAT))
-            wf.setframerate(RATE)
-            wf.writeframes(b''.join(frames))
-        print(f"Saved {filename}")
-        file_num += 1
-
-        result = model.transcribe(filename)
+        chunk_data = q.get()
+        data = np.frombuffer(chunk_data, np.int16).flatten().astype(np.float32) / 32768.0
+        result = model.transcribe(data)
         print(result['text'])
 
 if __name__ == "__main__":
