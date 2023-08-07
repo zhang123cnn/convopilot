@@ -94,5 +94,9 @@ class GPTAPI:
     def generate_chat_response(self, messages, model_name="gpt-3.5-turbo", temperature=0.8, use_cache=True):
         return asyncio.run(self.agenerate_chat_response(messages, model_name, temperature, use_cache))
 
+    def generate_text(self, prompt):
+        return gptapi.generate_chat_respjnse([
+                {"role": "user", "content": prompt},
+            ], model_name="gpt-4")
 
 gptapi = GPTAPI()

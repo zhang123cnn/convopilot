@@ -6,9 +6,7 @@ import queue
 import whisper
 import numpy as np
 
-from gpt_api import gptapi
-gptapi.setup_key(openai_key_path='/Users/xiaomeng/.openai/api_secret_key')
-gptapi.set_budget(5)
+from llm_models import get_llm_model
 
 CHUNK_DURATION = 20
 RATE = 16000
@@ -47,37 +45,40 @@ def transcribe_audio(q, tq, outputfile):
         tq.put(transcription_data)
 
 
-def generate_llm_insights(tq, context): 
+def generate_llm_insights(tq, context, llm_model, llm_prompt): 
+    model = get_llm_model(llm_model)
     while True:
         transcription_data = tq.get()
         prompt = f"""
         Context: {context}
-        Could you summarize the top five insights from the conversation below?
+        Given the context above, {llm_prompt}
         {transcription_data}
         """
-        response = gptapi.generate_chat_response([
-            {"role": "user", "content": prompt},
-        ], model_name="gpt-4")
 
+        response = model.generate_text(prompt)
         print(response)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument("--output_file", "-o", type=str, default="./transcription.txt", help="file to save the outputs")
+    parser.add_argument("--llm_model", "-m", type=str, default="none", help="llm model to use for conversation analysis")
+    parser.add_argument("--llm_prompt", "-p", type=str, default="Could you summarize the top insights from the conversation below", help="prompt used for real time conversation analysis")
 
     args = parser.parse_args().__dict__
     output_file: str = args.pop("output_file")
+    llm_model: str = args.pop("llm_model")
+    llm_prompt: str = args.pop("llm_prompt")
 
-    context = input("Please enter some context for the conversation: ")
+    if llm_model != "none":
+        context = input("Please enter some context for the conversation: ")
+        llm_thread = threading.Thread(target=generate_llm_insights, args=(transcription_queue, context, llm_model, llm_prompt))
 
     record_thread = threading.Thread(target=record_audio, args=(audio_queue,))
     transcribe_thread = threading.Thread(target=transcribe_audio, args=(audio_queue, transcription_queue, output_file))
-    llm_thread = threading.Thread(target=generate_llm_insights, args=(transcription_queue, context))
 
     record_thread.start()
     transcribe_thread.start()
-    llm_thread.start()
 
     try:
         while True:
