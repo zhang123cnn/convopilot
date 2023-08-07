@@ -1,10 +1,17 @@
-from gpt_api import gptapi
-gptapi.setup_key(openai_key_path='/Users/xiaomeng/.openai/api_secret_key')
-gptapi.set_budget(5)
+from gpt_api import GPTAPI
 
+name_to_model = {}
 
 def get_llm_model(model_name):
-    if model_name == "gpt-4":
-        return gptapi
+    global name_to_model
+    if model_name in name_to_model:
+        return name_to_model[model_name]
 
     raise ValueError("Invalid llm model")
+
+def register_llm_model(model_name, model):
+    global name_to_model
+    name_to_model[model_name] = model
+
+register_llm_model("gpt-4", GPTAPI(model_name="gpt-4", budget=5))
+register_llm_model("gpt-3.5", GPTAPI(model_name="gpt-3.5-turbo", budget=5))

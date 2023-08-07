@@ -11,19 +11,18 @@ billing = {
     'gpt-4-32k-0314': 0.06
 }
 
+def setup_key(openai_key_path='~/.openai/api_secret_key'):
+    with open(openai_key_path, 'r') as f:
+        openai.api_key = f.read().strip()
+
 class GPTAPI:
-    def __init__(self):
-        self._budget = 1
+    def __init__(self, model_name, budget):
+        self._budget = budget
         self._cur_cost = 0
         self._total_tokens = 0
         self._cached_response = {}
+        self._model_name = model_name
 
-    def setup_key(self, openai_key_path='~/.openai/api_secret_key'):
-        with open(openai_key_path, 'r') as f:
-            openai.api_key = f.read().strip()
-
-    def set_budget(self, budget):
-        self._budget = budget
 
     def reset_usage(self):
         self._cur_cost = 0
@@ -36,7 +35,7 @@ class GPTAPI:
     def hash_string(self, input_string):
         return hashlib.sha256(input_string.encode()).hexdigest()
 
-    async def agenerate_chat_response(self, messages, model_name="gpt-3.5-turbo", temperature=0.8, use_cache=True):
+    async def agenerate_chat_response(self, messages, temperature=0.8, use_cache=True):
         if (self._cur_cost >= self._budget):
             print("Budget exceeded. Current cost: {}, Budget: {}".format(
                 self._cur_cost, self._budget))
@@ -63,7 +62,7 @@ class GPTAPI:
             try:
                 count += 1
                 response = await openai.ChatCompletion.acreate(
-                    model=model_name,
+                    model=self._model_name,
                     messages=messages,
                     temperature=temperature,
                 )
@@ -82,7 +81,7 @@ class GPTAPI:
 
         # update the cost
         total_tokens = response.usage.total_tokens
-        self._cur_cost += total_tokens * (billing[model_name] / 1000)
+        self._cur_cost += total_tokens * (billing[self._model_name] / 1000)
         self._total_tokens += total_tokens
 
         if use_cache:
@@ -91,12 +90,10 @@ class GPTAPI:
 
         return response.choices[0].message.content
 
-    def generate_chat_response(self, messages, model_name="gpt-3.5-turbo", temperature=0.8, use_cache=True):
-        return asyncio.run(self.agenerate_chat_response(messages, model_name, temperature, use_cache))
+    def generate_chat_response(self, messages, temperature=0.8, use_cache=True):
+        return asyncio.run(self.agenerate_chat_response(messages, temperature, use_cache))
 
     def generate_text(self, prompt):
-        return gptapi.generate_chat_respjnse([
-                {"role": "user", "content": prompt},
-            ], model_name="gpt-4")
+        return self.generate_chat_response([{"role": "user", "content": prompt}])
 
-gptapi = GPTAPI()
+setup_key(openai_key_path='/Users/xiaomeng/.openai/api_secret_key')
