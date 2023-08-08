@@ -1,6 +1,7 @@
 import asyncio
 import openai
 import hashlib
+import os
 
 billing = {
     'gpt-3.5-turbo': 0.002,
@@ -11,9 +12,9 @@ billing = {
     'gpt-4-32k-0314': 0.06
 }
 
-def setup_key(openai_key_path='~/.openai/api_secret_key'):
-    with open(openai_key_path, 'r') as f:
-        openai.api_key = f.read().strip()
+print(os.environ.get('OPENAI_API_KEY'))
+
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 
 class GPTAPI:
     def __init__(self, model_name, budget):
@@ -95,5 +96,3 @@ class GPTAPI:
 
     def generate_text(self, prompt):
         return self.generate_chat_response([{"role": "user", "content": prompt}])
-
-setup_key(openai_key_path='/Users/xiaomeng/.openai/api_secret_key')

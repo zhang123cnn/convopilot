@@ -2,3 +2,8 @@ env/
 output/
 __pycache__/
 transcription.txt
+build/
+dist/
+*.egg-info/
+.env
+.DS_STORE

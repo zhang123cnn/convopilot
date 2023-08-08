@@ -6,7 +6,11 @@ import queue
 import whisper
 import numpy as np
 
-from llm_models import get_llm_model
+from convopilot.llm_models import get_llm_model
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 CHUNK_DURATION = 30
 RATE = 16000
@@ -76,7 +80,7 @@ def generate_llm_insights(tq, context, llm_model, llm_prompt):
 
     print("Stopping llm generation.")
 
-if __name__ == "__main__":
+def cli():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument("--output_file", "-o", type=str, default="./transcription.txt", help="file to save the outputs")
@@ -103,6 +107,7 @@ if __name__ == "__main__":
         while True:
             time.sleep(0.1)
     except KeyboardInterrupt:
+        global should_stop
         should_stop = True
     
     record_thread.join()
@@ -110,4 +115,8 @@ if __name__ == "__main__":
     if llm_model != "none":
         llm_thread.join()
 
-    print("converation assistant stopped.")
+    print("convopilot stopped.")
+
+
+if __name__ == "__main__":
+    cli()
