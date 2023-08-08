@@ -49,8 +49,11 @@ def transcribe_audio(q, tq, outputfile):
         data = np.frombuffer(chunk_data, np.int16).flatten().astype(np.float32) / 32768.0
         result = model.transcribe(data)
         # open local file to append result into it
-        with open(outputfile, "a") as f:
-           f.write(result['text'])
+        if outputfile == "stdout":
+            print(result['text'])
+        else:
+            with open(outputfile, "a") as f:
+                f.write(result['text'])
 
         transcription_data += result['text']
         tq.put(transcription_data)
@@ -83,7 +86,7 @@ def generate_llm_insights(tq, context, llm_model, llm_prompt):
 def cli():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("--output_file", "-o", type=str, default="./transcription.txt", help="file to save the outputs")
+    parser.add_argument("--output_file", "-o", type=str, default="stdout", help="file to save the outputs")
     parser.add_argument("--llm_model", "-m", type=str, default="none", help="llm model to use for conversation analysis")
     parser.add_argument("--llm_prompt", "-p", type=str, default="Could you summarize the top insights from the conversation below", help="prompt used for real time conversation analysis")
 
