@@ -9,8 +9,8 @@
 1. python -m pip install -e .
 1. convopilot
 1. [Optional] If you homebrew is installed in a non-system directory, make sure you export the c include path and library path as follows
-  1. export C_INCLUDE_PATH=$C_INCLUDE_PATH:[Your local homebrew path]/homebrew/include
-  1. export LIBRARY_PATH=$LIBRARY_PATH:[Your local homebrew path]/homebrew/lib
+    1. export C_INCLUDE_PATH=$C_INCLUDE_PATH:[Your local homebrew path]/homebrew/include
+    1. export LIBRARY_PATH=$LIBRARY_PATH:[Your local homebrew path]/homebrew/lib
 
 ## Usage
 ### Using GPT-4
