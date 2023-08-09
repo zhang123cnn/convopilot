@@ -12,8 +12,6 @@ billing = {
     'gpt-4-32k-0314': 0.06
 }
 
-print(os.environ.get('OPENAI_API_KEY'))
-
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 
 class GPTAPI:

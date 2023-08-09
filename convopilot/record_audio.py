@@ -82,19 +82,8 @@ def generate_llm_insights(tq, context, llm_model, llm_prompt):
         print(response)
 
     print("Stopping llm generation.")
-
-def cli():
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    parser.add_argument("--output_file", "-o", type=str, default="stdout", help="file to save the outputs")
-    parser.add_argument("--llm_model", "-m", type=str, default="none", help="llm model to use for conversation analysis")
-    parser.add_argument("--llm_prompt", "-p", type=str, default="Could you summarize the top insights from the conversation below", help="prompt used for real time conversation analysis")
-
-    args = parser.parse_args().__dict__
-    output_file: str = args.pop("output_file")
-    llm_model: str = args.pop("llm_model")
-    llm_prompt: str = args.pop("llm_prompt")
-
+    
+def start(output_file, llm_model, llm_prompt):
     if llm_model != "none":
         context = input("Please enter some context for the conversation: ")
         llm_thread = threading.Thread(target=generate_llm_insights, args=(transcription_queue, context, llm_model, llm_prompt))
@@ -120,6 +109,20 @@ def cli():
 
     print("convopilot stopped.")
 
+
+def cli():
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument("--output_file", "-o", type=str, default="stdout", help="file to save the outputs")
+    parser.add_argument("--llm_model", "-m", type=str, default="none", help="llm model to use for conversation analysis")
+    parser.add_argument("--llm_prompt", "-p", type=str, default="Could you summarize the top insights from the conversation below", help="prompt used for real time conversation analysis")
+
+    args = parser.parse_args().__dict__
+    output_file: str = args.pop("output_file")
+    llm_model: str = args.pop("llm_model")
+    llm_prompt: str = args.pop("llm_prompt")
+
+    start(output_file, llm_model, llm_prompt)
 
 if __name__ == "__main__":
     cli()
