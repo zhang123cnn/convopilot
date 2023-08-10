@@ -7,3 +7,5 @@ dist/
 *.egg-info/
 .env
 .DS_STORE
+token.pickle
+credentials.json
