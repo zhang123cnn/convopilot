@@ -109,10 +109,6 @@ def generate_llm_insights(tq, context, llm_model, llm_prompt, gdocument):
 def start(output_file, llm_model, llm_prompt, googledoc_metadata):
     document = None
     if googledoc_metadata is not None:
-        if googledoc_metadata['name'] == "" or googledoc_metadata['folder'] == "":
-            print("Please provide a valid google doc name and folder")
-            return
-
         document = google_doc.create_doc(googledoc_metadata['name'], googledoc_metadata['folder'])
         print(f"Created google doc at https://docs.google.com/document/d/{document['documentId']}/edit")
 
@@ -156,7 +152,7 @@ def cli():
                         help="prompt used for real time conversation analysis")
     parser.add_argument("--googledoc", "-t", type=bool,
                         default=False, help="use google doc to save the outputs")
-    parser.add_argument("--googledocname", "-n", type=str, default="",
+    parser.add_argument("--googledocname", "-n", type=str, default="Untitled",
                         help="name of the google doc to save the outputs")
     parser.add_argument("--googledocfolder", "-f", type=str, default="",
                         help="folder of the google doc to save the outputs")

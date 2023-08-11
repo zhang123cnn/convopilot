@@ -38,6 +38,9 @@ def create_doc(title, folder_id):
 
     document = service.documents().create(body={'title': title}).execute()
 
+    if folder_id == "":
+        return document
+
     drive_service = build('drive', 'v3', credentials=creds)
 
     file_id = document['documentId']
