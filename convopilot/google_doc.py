@@ -6,8 +6,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+creds = None
 
-def get_creds():
+def init_creds():
+    global creds
     credentials_text = os.environ.get("GOOGLE_DOC_CREDENTIALS")
     credentials = json.loads(credentials_text)
     # Load the credentials
@@ -29,9 +31,6 @@ def get_creds():
             creds = flow.run_local_server(port=0)
             with open('token.pickle', 'wb') as token:
                 pickle.dump(creds, token)
-    return creds
-
-creds = get_creds()
 
 def create_doc(title, folder_id):
     service = build('docs', 'v1', credentials=creds)

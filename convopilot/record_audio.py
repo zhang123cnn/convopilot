@@ -109,6 +109,7 @@ def generate_llm_insights(tq, context, llm_model, llm_prompt, gdocument):
 def start(output_file, llm_model, llm_prompt, googledoc_metadata):
     document = None
     if googledoc_metadata is not None:
+        google_doc.init_creds()
         document = google_doc.create_doc(googledoc_metadata['name'], googledoc_metadata['folder'])
         print(f"Created google doc at https://docs.google.com/document/d/{document['documentId']}/edit")
 
