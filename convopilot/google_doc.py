@@ -47,16 +47,31 @@ def create_doc(title, folder_id):
 
 
 # Upload a string to the Google Doc
-def insert_text(doc_id, text):
-    print(text)
+def insert_paragraph(doc_id, text, paragraph_style='NORMAL_TEXT'):
     service = build('docs', 'v1', credentials=creds)
+
+    paragraph = text + "\n"
+    start_index = 1
+    end_index = start_index + len(paragraph)
     requests = [
         {
             'insertText': {
                 'location': {
-                    'index': 1,
+                    'index': start_index,
                 },
-                'text': text + '\n'
+                'text': paragraph
+            }
+        },
+                {
+            'updateParagraphStyle': {
+                'range': {
+                    'startIndex': start_index,
+                    'endIndex': end_index
+                },
+                'paragraphStyle': {
+                    'namedStyleType': paragraph_style
+                },
+                'fields': 'namedStyleType'
             }
         }
     ]

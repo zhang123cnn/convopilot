@@ -63,8 +63,9 @@ def transcribe_audio(q, tq, outputfile, gdocument):
         transcription_data += result['text']
         tq.put(transcription_data)
 
-    google_doc.insert_text(gdocument['documentId'], transcription_data)
-    google_doc.insert_text(gdocument['documentId'], "Transcription:")
+    if gdocument is not None:
+        google_doc.insert_paragraph(gdocument['documentId'], transcription_data + "\n")
+        google_doc.insert_paragraph(gdocument['documentId'], "Transcription:", 'HEADING_2')
 
     tq.put(None)
     print("Stopping transcription.")
@@ -79,18 +80,29 @@ def generate_llm_insights(tq, context, llm_model, llm_prompt, gdocument):
             break
 
         prompt = f"""
-        Context: {context}
-        Previous Response: {previous_response}
-        Given the context above, {llm_prompt}
+        You are the best AI conversation facilitator. You are helping a group of people have a conversation about a topic. 
+        This is the context for the conversation:
+        {context}
+        This is what the group want you to help answer:
+        {llm_prompt}
+        This is your answer up until 30 seconds ago:
+        {previous_response}
+        This is the latest 2000 words of the conversation:
         {transcription_data[-2000:]}
+
+        Given the information above, could you generate a new answer considering your previous answer and latest conversation?
         """
 
         response = model.generate_text(prompt)
         previous_response = response
         print(response)
 
-    google_doc.insert_text(gdocument['documentId'], previous_response)
-    google_doc.insert_text(gdocument['documentId'], llm_prompt)
+    if gdocument is not None:
+        google_doc.insert_paragraph(gdocument['documentId'], previous_response + "\n")
+        google_doc.insert_paragraph(gdocument['documentId'], llm_prompt, 'HEADING_2')
+        google_doc.insert_paragraph(gdocument['documentId'], f"{context} \n")
+        google_doc.insert_paragraph(gdocument['documentId'], "Context:", 'HEADING_2')
+
     print("Stopping llm generation.")
 
 
@@ -124,7 +136,6 @@ def start(output_file, llm_model, llm_prompt, googledoc_metadata):
         global should_stop
         should_stop = True
 
-
     record_thread.join()
     transcribe_thread.join()
     if llm_model != "none":
@@ -141,7 +152,7 @@ def cli():
                         default="stdout", help="file to save the outputs")
     parser.add_argument("--llm_model", "-m", type=str, default="none",
                         help="llm model to use for conversation analysis")
-    parser.add_argument("--llm_prompt", "-p", type=str, default="Could you summarize the top insights from the conversation below",
+    parser.add_argument("--llm_prompt", "-p", type=str, default="Could you summarize the top insights from the conversation in bullet points?",
                         help="prompt used for real time conversation analysis")
     parser.add_argument("--googledoc", "-t", type=bool,
                         default=False, help="use google doc to save the outputs")
