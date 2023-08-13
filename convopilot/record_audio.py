@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 from convopilot import google_doc
 from convopilot.llm_insight_generator import LLMInsightGenerator
-from convopilot.llm_models import get_llm_model
 from convopilot.module_factory import ModuleFactory
 from convopilot.pyaudio_recorder import PyAudioRecorder
 from convopilot.whisper_transcriber import WhisperAudioTranscriber
@@ -24,28 +23,28 @@ def start(output_file, llm_model, llm_prompt, googledoc_metadata):
     audio_queue = queue.Queue()
     transcription_queue = queue.Queue()
 
-    document = None
+    gdoc_writer = None
     if googledoc_metadata is not None:
-        google_doc.init_creds()
-        document = google_doc.create_doc(
+        gdoc_writer = google_doc.GoogleDocWriter(
             googledoc_metadata['name'], googledoc_metadata['folder'])
-        print(
-            f"Created google doc at https://docs.google.com/document/d/{document['documentId']}/edit")
 
     executors = []
     if llm_model != "none":
         context = input("Please enter some context for the conversation: ")
         insight_generator = ModuleFactory.create_insight_generator(
-            'llm', input_queue=transcription_queue, llm_model=llm_model, context=context, llm_prompt=llm_prompt, gdocument=document)
+            'llm', input_queue=transcription_queue, llm_model=llm_model, 
+            context=context, llm_prompt=llm_prompt, gdoc_writer=gdoc_writer)
         executors.append(insight_generator.generate)
 
     audio_recorder = ModuleFactory.create_recorder(
-        'pyaudio', output_queue=audio_queue, chunk_duration=30, rate=16000, channels=1, chunk=1024, format=pyaudio.paInt16)
+        'pyaudio', output_queue=audio_queue, chunk_duration=30, rate=16000, 
+        channels=1, chunk=1024, format=pyaudio.paInt16)
 
     executors.append(audio_recorder.record)
 
     audio_transcriber = ModuleFactory.create_transcriber(
-        'whisper', input_queue=audio_queue, output_queue=transcription_queue, outputfile=output_file, gdocument=document)
+        'whisper', input_queue=audio_queue, output_queue=transcription_queue, 
+        outputfile=output_file, gdoc_writer=gdoc_writer)
 
     executors.append(audio_transcriber.transcribe)
 

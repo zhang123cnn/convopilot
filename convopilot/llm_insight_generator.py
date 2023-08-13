@@ -5,11 +5,11 @@ from convopilot.llm_models import get_llm_model
 
 
 class LLMInsightGenerator(InsightGenerator):
-    def __init__(self, input_queue, llm_model, context, llm_prompt, gdocument):
+    def __init__(self, input_queue, llm_model, context, llm_prompt, gdoc_writer):
         self.model = get_llm_model(llm_model)
         self.context = context
         self.llm_prompt = llm_prompt
-        self.gdocument = gdocument
+        self.gdoc_writer = gdoc_writer
         self.input_queue = input_queue
 
     def generate(self):
@@ -37,13 +37,10 @@ class LLMInsightGenerator(InsightGenerator):
             previous_response = response
             print(response)
 
-        if self.gdocument is not None:
-            google_doc.insert_paragraph(
-                self.gdocument['documentId'], previous_response + "\n")
-            google_doc.insert_paragraph(
-                self.gdocument['documentId'], self.llm_prompt, 'HEADING_2')
-            google_doc.insert_paragraph(self.gdocument['documentId'], f"{self.context} \n")
-            google_doc.insert_paragraph(
-                self.gdocument['documentId'], "Context:", 'HEADING_2')
+        if self.gdoc_writer is not None:
+            self.gdoc_writer.insert_paragraph(previous_response + "\n")
+            self.gdoc_writer.insert_paragraph(self.llm_prompt, 'HEADING_2')
+            self.gdoc_writer.insert_paragraph(f"{self.context} \n")
+            self.gdoc_writer.insert_paragraph("Context:", 'HEADING_2')
 
         print("Stopped llm generation.")
