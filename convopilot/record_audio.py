@@ -15,17 +15,14 @@ from convopilot.whisper_transcriber import WhisperAudioTranscriber
 
 load_dotenv()
 
-audio_queue = queue.Queue()
-transcription_queue = queue.Queue()
-
-def register_modules():
-    ModuleFactory.register_recorder('pyaudio', PyAudioRecorder)
-    ModuleFactory.register_transcriber('whisper', WhisperAudioTranscriber)
-    ModuleFactory.register_insight_generator('llm', LLMInsightGenerator)
+ModuleFactory.register_recorder('pyaudio', PyAudioRecorder)
+ModuleFactory.register_transcriber('whisper', WhisperAudioTranscriber)
+ModuleFactory.register_insight_generator('llm', LLMInsightGenerator)
 
 
 def start(output_file, llm_model, llm_prompt, googledoc_metadata):
-    register_modules()
+    audio_queue = queue.Queue()
+    transcription_queue = queue.Queue()
 
     document = None
     if googledoc_metadata is not None:
@@ -35,27 +32,28 @@ def start(output_file, llm_model, llm_prompt, googledoc_metadata):
         print(
             f"Created google doc at https://docs.google.com/document/d/{document['documentId']}/edit")
 
+    executors = []
     if llm_model != "none":
         context = input("Please enter some context for the conversation: ")
         insight_generator = ModuleFactory.create_insight_generator(
-            'llm', llm_model=llm_model, context=context, llm_prompt=llm_prompt, gdocument=document)
-        llm_thread = threading.Thread(
-            target=insight_generator.generate, args=(transcription_queue,))
-        llm_thread.start()
+            'llm', input_queue=transcription_queue, llm_model=llm_model, context=context, llm_prompt=llm_prompt, gdocument=document)
+        executors.append(insight_generator.generate)
 
     audio_recorder = ModuleFactory.create_recorder(
-        'pyaudio', chunk_duration=30, rate=16000, channels=1, chunk=1024, format=pyaudio.paInt16)
+        'pyaudio', output_queue=audio_queue, chunk_duration=30, rate=16000, channels=1, chunk=1024, format=pyaudio.paInt16)
+
+    executors.append(audio_recorder.record)
 
     audio_transcriber = ModuleFactory.create_transcriber(
-        'whisper', outputfile=output_file, gdocument=document)
+        'whisper', input_queue=audio_queue, output_queue=transcription_queue, outputfile=output_file, gdocument=document)
 
-    record_thread = threading.Thread(
-        target=audio_recorder.record, args=(audio_queue,))
-    transcribe_thread = threading.Thread(target=audio_transcriber.transcribe, args=(
-        audio_queue, transcription_queue))
+    executors.append(audio_transcriber.transcribe)
 
-    record_thread.start()
-    transcribe_thread.start()
+    threads = []
+    for executor in executors:
+        thread = threading.Thread(target=executor)
+        thread.start()
+        threads.append(thread)
 
     try:
         while True:
@@ -63,10 +61,8 @@ def start(output_file, llm_model, llm_prompt, googledoc_metadata):
     except KeyboardInterrupt:
         audio_recorder.stop()
 
-    record_thread.join()
-    transcribe_thread.join()
-    if llm_model != "none":
-        llm_thread.join()
+    for thread in threads:
+        thread.join()
 
     print("convopilot stopped.")
 

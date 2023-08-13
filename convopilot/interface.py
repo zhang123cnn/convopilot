@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 class AudioRecorder(ABC):
     @abstractmethod
-    def record(self, output_queue):
+    def record(self):
         pass
 
     @abstractmethod
@@ -11,10 +11,10 @@ class AudioRecorder(ABC):
 
 class AudioTranscriber(ABC):
     @abstractmethod
-    def transcribe(self, input_queue, output_queue):
+    def transcribe(self):
         pass
 
 class InsightGenerator(ABC):
     @abstractmethod
-    def generate(self, input_queue):
+    def generate(self):
         pass

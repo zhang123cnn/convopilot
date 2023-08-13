@@ -5,16 +5,17 @@ from convopilot.llm_models import get_llm_model
 
 
 class LLMInsightGenerator(InsightGenerator):
-    def __init__(self, llm_model, context, llm_prompt, gdocument):
+    def __init__(self, input_queue, llm_model, context, llm_prompt, gdocument):
         self.model = get_llm_model(llm_model)
         self.context = context
         self.llm_prompt = llm_prompt
         self.gdocument = gdocument
+        self.input_queue = input_queue
 
-    def generate(self, input_queue):
+    def generate(self):
         previous_response = ""
         while True:
-            transcription_data = input_queue.get()
+            transcription_data = self.input_queue.get()
             if transcription_data is None:
                 break
 
