@@ -54,7 +54,7 @@ class GoogleDocWriter(object):
 
         return document
 
-    def insert_paragraph(self, text, paragraph_style='NORMAL_TEXT'):
+    def insert_paragraph_front(self, text, paragraph_style='NORMAL_TEXT'):
         service = build('docs', 'v1', credentials=self.creds)
 
         paragraph = text + "\n"

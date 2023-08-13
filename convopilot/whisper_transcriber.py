@@ -33,8 +33,8 @@ class WhisperAudioTranscriber(AudioTranscriber):
             self.output_queue.put(self.transcription_data)
 
         if self.gdoc_writer is not None:
-            self.gdoc_writer.insert_paragraph(self.transcription_data + "\n")
-            self.gdoc_writer.insert_paragraph("Transcription:", 'HEADING_2')
+            self.gdoc_writer.insert_paragraph_front(self.transcription_data + "\n")
+            self.gdoc_writer.insert_paragraph_front("Transcription:", 'HEADING_2')
 
         self.output_queue.put(None)
         print("Stopping transcription.")

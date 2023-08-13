@@ -38,9 +38,9 @@ class LLMInsightGenerator(InsightGenerator):
             print(response)
 
         if self.gdoc_writer is not None:
-            self.gdoc_writer.insert_paragraph(previous_response + "\n")
-            self.gdoc_writer.insert_paragraph(self.llm_prompt, 'HEADING_2')
-            self.gdoc_writer.insert_paragraph(f"{self.context} \n")
-            self.gdoc_writer.insert_paragraph("Context:", 'HEADING_2')
+            self.gdoc_writer.insert_paragraph_front(previous_response + "\n")
+            self.gdoc_writer.insert_paragraph_front(self.llm_prompt, 'HEADING_2')
+            self.gdoc_writer.insert_paragraph_front(f"{self.context} \n")
+            self.gdoc_writer.insert_paragraph_front("Context:", 'HEADING_2')
 
         print("Stopped llm generation.")
