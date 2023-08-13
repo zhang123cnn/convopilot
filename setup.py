@@ -12,6 +12,8 @@ setup(
     author_email="zhang123cnn@gmail.com",
     description="An AI tool to help users better navigate conversations.",
     install_requires=requirements,
+    url='https://github.com/zhang123cnn/convopilot',
+    readme='README.md',
     entry_points={
         'console_scripts': [
             'convopilot=convopilot.record_audio:cli'
