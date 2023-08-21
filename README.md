@@ -1,7 +1,12 @@
 # ConvoPilot
 
 
-## Get started (Mac)
+## Getting started (auto)
+
+Run the automatic setup script:
+`./run.sh`
+
+## Getting started (Mac)
 1. make sure you have installed homebrew and python3
 1. brew install ffmpeg
 1. brew install portaudio
