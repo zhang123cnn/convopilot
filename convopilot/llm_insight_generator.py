@@ -14,10 +14,13 @@ class LLMInsightGenerator(InsightGenerator):
 
     def generate(self):
         previous_response = ""
+        transcription_data = ""
         while True:
-            transcription_data = self.input_queue.get()
-            if transcription_data is None:
+            latest = self.input_queue.get()
+            if latest is None:
                 break
+
+            transcription_data += latest
 
             prompt = f"""
             You are the best AI conversation facilitator. You are helping a group of people have a conversation about a topic. 

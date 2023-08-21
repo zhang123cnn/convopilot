@@ -8,13 +8,13 @@ model = whisper.load_model("medium")
 
 class WhisperAudioTranscriber(AudioTranscriber):
     def __init__(self, input_queue, output_queue, outputfile, gdoc_writer):
-        self.transcription_data = ""
         self.outputfile = outputfile
         self.gdoc_writer = gdoc_writer
         self.input_queue = input_queue
         self.output_queue = output_queue
 
     def transcribe(self):
+        transcription_data = ""
         while True:
             chunk_data = self.input_queue.get()
             if (chunk_data is None):
@@ -29,11 +29,11 @@ class WhisperAudioTranscriber(AudioTranscriber):
                 with open(self.outputfile, "a") as f:
                     f.write(result['text'])
 
-            self.transcription_data += result['text']
-            self.output_queue.put(self.transcription_data)
+            self.output_queue.put(result['text'])
+            transcription_data += result['text']
 
         if self.gdoc_writer is not None:
-            self.gdoc_writer.insert_paragraph_front(self.transcription_data + "\n")
+            self.gdoc_writer.insert_paragraph_front(transcription_data + "\n")
             self.gdoc_writer.insert_paragraph_front("Transcription:", 'HEADING_2')
 
         self.output_queue.put(None)
