@@ -30,7 +30,7 @@ class LLMInsightGenerator(InsightGenerator):
             This is the latest 2000 words of the conversation:
             {transcription_data[-2000:]}
 
-            Given the information above, could you generate a new answer for the whole conversation?
+            Given the information above, could you generate a new answer considering your previous answer and latest conversation?
             """
 
             response = self.model.generate_text(prompt)
