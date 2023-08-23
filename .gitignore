@@ -9,3 +9,8 @@ dist/
 .DS_STORE
 token.pickle
 credentials.json
+node_modules/
+package.json
+package-lock.json
+yarn.lock
+settings.json

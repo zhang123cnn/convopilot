@@ -19,51 +19,51 @@ ModuleFactory.register_transcriber('whisper', WhisperAudioTranscriber)
 ModuleFactory.register_insight_generator('llm', LLMInsightGenerator)
 
 
-def start(output_file, llm_model, llm_prompt, googledoc_metadata):
-    audio_queue = queue.Queue()
-    transcription_queue = queue.Queue()
+class Session(object):
+    def __init__(self):
+        self.threads = []
+        self.audio_recorder = None
 
-    gdoc_writer = None
-    if googledoc_metadata is not None:
-        gdoc_writer = google_doc.GoogleDocWriter(
-            googledoc_metadata['name'], googledoc_metadata['folder'])
 
-    executors = []
-    if llm_model != "none":
-        context = input("Please enter some context for the conversation: ")
-        insight_generator = ModuleFactory.create_insight_generator(
-            'llm', input_queue=transcription_queue, llm_model=llm_model, 
-            context=context, llm_prompt=llm_prompt, gdoc_writer=gdoc_writer)
-        executors.append(insight_generator.generate)
+    def start(self, output_file, llm_model, llm_prompt, googledoc_metadata):
+        audio_queue = queue.Queue()
+        transcription_queue = queue.Queue()
 
-    audio_recorder = ModuleFactory.create_recorder(
-        'pyaudio', output_queue=audio_queue, chunk_duration=30, rate=16000, 
-        channels=1, chunk=1024, format=pyaudio.paInt16)
+        gdoc_writer = None
+        if googledoc_metadata is not None:
+            gdoc_writer = google_doc.GoogleDocWriter(
+                googledoc_metadata['name'], googledoc_metadata['folder'])
 
-    executors.append(audio_recorder.record)
+        executors = []
+        if llm_model != "none":
+            context = input("Please enter some context for the conversation: ")
+            insight_generator = ModuleFactory.create_insight_generator(
+                'llm', input_queue=transcription_queue, llm_model=llm_model, 
+                context=context, llm_prompt=llm_prompt, gdoc_writer=gdoc_writer)
+            executors.append(insight_generator.generate)
 
-    audio_transcriber = ModuleFactory.create_transcriber(
-        'whisper', input_queue=audio_queue, output_queue=transcription_queue, 
-        outputfile=output_file, gdoc_writer=gdoc_writer)
+        self.audio_recorder = ModuleFactory.create_recorder(
+            'pyaudio', output_queue=audio_queue, chunk_duration=30, rate=16000, 
+            channels=1, chunk=1024, format=pyaudio.paInt16)
 
-    executors.append(audio_transcriber.transcribe)
+        executors.append(self.audio_recorder.record)
 
-    threads = []
-    for executor in executors:
-        thread = threading.Thread(target=executor)
-        thread.start()
-        threads.append(thread)
+        audio_transcriber = ModuleFactory.create_transcriber(
+            'whisper', input_queue=audio_queue, output_queue=transcription_queue, 
+            outputfile=output_file, gdoc_writer=gdoc_writer)
 
-    try:
-        while True:
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        audio_recorder.stop()
+        executors.append(audio_transcriber.transcribe)
 
-    for thread in threads:
-        thread.join()
+        for executor in executors:
+            thread = threading.Thread(target=executor)
+            self.threads.append(thread)
+            thread.start()
 
-    print("convopilot stopped.")
+    def stop(self):
+        self.audio_recorder.stop()
+        for thread in self.threads:
+            thread.join()
+
 
 
 def cli():
@@ -98,7 +98,16 @@ def cli():
             "folder": googledocfolder
         }
 
-    start(output_file, llm_model, llm_prompt, googledoc_metadata)
+    session = Session()
+    session.start(output_file, llm_model, llm_prompt, googledoc_metadata)
+
+    try:
+        while True:
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        session.stop()
+
+    print("convopilot stopped.")
 
 
 if __name__ == "__main__":
