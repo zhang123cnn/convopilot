@@ -1,6 +1,9 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
 import './App.css';
+const io = require('socket.io-client');
+
+const socket = io('http://127.0.0.1:5555');
 
 function Hello() {
   return (
@@ -12,7 +15,13 @@ function Hello() {
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <button
           onClick={() => {
-            startServer();
+            socket.emit('start_recording', {
+              data: {
+                llm_model: "gpt-3.5",
+                llm_prompt: "Could you summarize the top insights from the conversation in bullet points?",
+                llm_context: "no context"
+              }
+            });
           }}
         >
           Start
@@ -20,7 +29,7 @@ function Hello() {
         <button
           style={{ marginLeft: '10px' }}
           onClick={() => {
-            stopServer();
+            socket.emit('stop_recording', {});
           }}
         >
           Stop
@@ -30,39 +39,6 @@ function Hello() {
   );
 }
 
-function startServer() {
-  const data = {
-    llm_model: "gpt-3.5",
-    llm_prompt: "Could you summarize the top insights from the conversation in bullet points?",
-    llm_context: "no context"
-  };
-
-  fetch("http://127.0.0.1:5555/start", {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  })
-    .then(response => {
-      console.log("HTTP request sent successfully");
-    })
-    .catch(error => {
-      console.error("Error sending HTTP request:", error);
-    });
-}
-
-function stopServer() {
-  fetch('http://127.0.0.1:5555/stop', {
-    method: 'POST'
-  })
-    .then(response => {
-      console.log('Server stopped successfully');
-    })
-    .catch(error => {
-      console.error('Error stopping server:', error);
-    });
-}
 
 export default function App() {
   return (
