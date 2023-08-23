@@ -1,5 +1,8 @@
-import { Tray, Menu, BrowserWindow } from 'electron';
+import { Tray, Menu, BrowserWindow, nativeImage } from 'electron';
 import path from 'path';
+
+const isDebug =
+  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 class TrayGenerator {
   tray: Tray | null;
@@ -51,10 +54,34 @@ class TrayGenerator {
   };
 
   createTray = () => {
-    this.tray = new Tray(path.join(__dirname, '../../assets/icons/16x16.png'));
-    this.tray.setIgnoreDoubleClickEvents(true);
-    this.tray.on('click', this.toggleWindow);
-    this.tray.on('right-click', this.rightClickMenu);
+    try {
+      let iconPath = path.join(
+        __dirname,
+        '..',
+        '..',
+        'asset',
+        'icons',
+        '16x16.png'
+      );
+      if (isDebug) {
+        iconPath = path.join(
+          __dirname,
+          '..',
+          '..',
+          'assets',
+          'icons',
+          '16x16.png'
+        );
+      }
+      const image = nativeImage.createFromPath(iconPath);
+
+      this.tray = new Tray(image);
+      this.tray.setIgnoreDoubleClickEvents(true);
+      this.tray.on('click', this.toggleWindow);
+      this.tray.on('right-click', this.rightClickMenu);
+    } catch (e) {
+      console.error('ERROR!', JSON.stringify(e));
+    }
   };
 }
 export default TrayGenerator;
