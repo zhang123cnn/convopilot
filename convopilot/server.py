@@ -1,15 +1,19 @@
 from flask import abort
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 import record_audio
 
 app = Flask(__name__)
+CORS(app)
+
 session = record_audio.Session()
 
 
 @app.route('/start', methods=['POST'])
 def start():
     data = request.json
+    print(data)
     output_file = data.get('output_file', 'stdout')
     googledoc_metadata = data.get('googledoc_metadata', None)
 
