@@ -152,6 +152,8 @@
       "icon.png",
       "64x64.png",
       "menubar.html",
+      "bin/",
+      "py/",
       "asset/"
     ],
     "afterSign": ".erb/scripts/notarize.js",

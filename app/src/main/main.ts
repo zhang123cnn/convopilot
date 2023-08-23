@@ -12,6 +12,7 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import { exec } from 'child_process';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import TrayGenerator from './TrayGenerator';
@@ -39,6 +40,27 @@ if (process.env.NODE_ENV === 'production') {
 
 const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+
+const runPython = async () => {
+  const basePath = path.join(__dirname, '..', '..');
+  const pythonBinary = 'python3';
+  let pythonScript = path.join(basePath, 'py', 'http_server.py');
+  if (isDebug) {
+    pythonScript = path.join(
+      basePath,
+      'release',
+      'app',
+      'py',
+      'http_server.py'
+    );
+  }
+  exec(`${pythonBinary} ${pythonScript}`, (error, stdout) => {
+    console.log(`stdout: ${stdout}`);
+    if (error) {
+      console.error(`@DEBUG:: error: ${error}`);
+    }
+  });
+};
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
@@ -134,10 +156,10 @@ app
     }
     const Tray = new TrayGenerator(mainWindow);
     Tray.createTray();
+    await runPython();
 
     app.on('activate', () => {
       console.log('@DEBUG:: App is activated');
-
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();

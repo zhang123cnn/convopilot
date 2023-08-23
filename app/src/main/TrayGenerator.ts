@@ -54,24 +54,11 @@ class TrayGenerator {
   };
 
   createTray = () => {
+    const basePath = path.join(__dirname, '..', '..');
     try {
-      let iconPath = path.join(
-        __dirname,
-        '..',
-        '..',
-        'asset',
-        'icons',
-        '16x16.png'
-      );
+      let iconPath = path.join(basePath, 'asset', 'icons', '16x16.png');
       if (isDebug) {
-        iconPath = path.join(
-          __dirname,
-          '..',
-          '..',
-          'assets',
-          'icons',
-          '16x16.png'
-        );
+        iconPath = path.join(basePath, 'assets', 'icons', '16x16.png');
       }
       const image = nativeImage.createFromPath(iconPath);
 
