@@ -5,10 +5,10 @@ from convopilot.llm_models import get_llm_model
 
 
 class LLMInsightGenerator(InsightGenerator):
-    def __init__(self, input_queue, llm_model, context, llm_prompt, gdoc_writer):
-        self.model = get_llm_model(llm_model)
-        self.context = context
-        self.llm_prompt = llm_prompt
+    def __init__(self, input_queue, llm_metadata, gdoc_writer):
+        self.model = get_llm_model(llm_metadata['model'])
+        self.context = llm_metadata['context']
+        self.llm_prompt = llm_metadata['prompt']
         self.gdoc_writer = gdoc_writer
         self.input_queue = input_queue
 

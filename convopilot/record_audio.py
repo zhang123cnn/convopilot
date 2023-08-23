@@ -24,8 +24,7 @@ class Session(object):
         self.threads = []
         self.audio_recorder = None
 
-
-    def start(self, output_file, llm_model, llm_prompt, googledoc_metadata):
+    def start(self, output_file, llm_metadata, googledoc_metadata):
         audio_queue = queue.Queue()
         transcription_queue = queue.Queue()
 
@@ -35,21 +34,19 @@ class Session(object):
                 googledoc_metadata['name'], googledoc_metadata['folder'])
 
         executors = []
-        if llm_model != "none":
-            context = input("Please enter some context for the conversation: ")
+        if llm_metadata is not None:
             insight_generator = ModuleFactory.create_insight_generator(
-                'llm', input_queue=transcription_queue, llm_model=llm_model, 
-                context=context, llm_prompt=llm_prompt, gdoc_writer=gdoc_writer)
+                'llm', input_queue=transcription_queue, llm_metadata=llm_metadata, gdoc_writer=gdoc_writer)
             executors.append(insight_generator.generate)
 
         self.audio_recorder = ModuleFactory.create_recorder(
-            'pyaudio', output_queue=audio_queue, chunk_duration=30, rate=16000, 
+            'pyaudio', output_queue=audio_queue, chunk_duration=30, rate=16000,
             channels=1, chunk=1024, format=pyaudio.paInt16)
 
         executors.append(self.audio_recorder.record)
 
         audio_transcriber = ModuleFactory.create_transcriber(
-            'whisper', input_queue=audio_queue, output_queue=transcription_queue, 
+            'whisper', input_queue=audio_queue, output_queue=transcription_queue,
             outputfile=output_file, gdoc_writer=gdoc_writer)
 
         executors.append(audio_transcriber.transcribe)
@@ -63,7 +60,6 @@ class Session(object):
         self.audio_recorder.stop()
         for thread in self.threads:
             thread.join()
-
 
 
 def cli():
@@ -83,10 +79,14 @@ def cli():
     parser.add_argument("--googledocfolder", "-f", type=str, default="",
                         help="folder of the google doc to save the outputs")
 
+    parser.add_argument("--llm_context", "-c", type=str, default="",
+                        help="folder of the google doc to save the outputs")
+
     args = parser.parse_args().__dict__
     output_file: str = args.pop("output_file")
     llm_model: str = args.pop("llm_model")
     llm_prompt: str = args.pop("llm_prompt")
+    llm_context: str = args.pop("llm_context")
     googledoc: bool = args.pop("googledoc")
     googledocname: str = args.pop("googledocname")
     googledocfolder: str = args.pop("googledocfolder")
@@ -98,8 +98,19 @@ def cli():
             "folder": googledocfolder
         }
 
+    llm_metadata = None
+    if llm_model != "none":
+        if (llm_context == ""):
+            llm_context = input("Please enter some context for the conversation: ")
+
+        llm_metadata = {
+            "model": llm_model,
+            "prompt": llm_prompt,
+            "context": llm_context
+        }
+
     session = Session()
-    session.start(output_file, llm_model, llm_prompt, googledoc_metadata)
+    session.start(output_file, llm_metadata, googledoc_metadata)
 
     try:
         while True:
