@@ -14,3 +14,4 @@ package.json
 package-lock.json
 yarn.lock
 settings.json
+data.json

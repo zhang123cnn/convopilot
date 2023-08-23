@@ -88,3 +88,7 @@ class GoogleDocWriter(object):
             return result
         except HttpError as error:
             print(f'An error occurred: {error}')
+
+    def __del__(self):
+        print(
+            f"Created google doc at https://docs.google.com/document/d/{self.document['documentId']}/edit")
