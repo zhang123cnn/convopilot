@@ -23,8 +23,14 @@ class Session(object):
     def __init__(self):
         self.threads = []
         self.audio_recorder = None
+        self.hasStarted = False
 
     def start(self, output_file, llm_metadata, googledoc_metadata):
+        if (self.hasStarted):
+            return False
+
+        self.hasStarted = True
+
         audio_queue = queue.Queue()
         transcription_queue = queue.Queue()
 
@@ -56,10 +62,18 @@ class Session(object):
             self.threads.append(thread)
             thread.start()
 
+        return True
+
     def stop(self):
+        if not self.hasStarted:
+            return False
+
+        self.hasStarted = False
         self.audio_recorder.stop()
         for thread in self.threads:
             thread.join()
+
+        return True
 
 
 def cli():
