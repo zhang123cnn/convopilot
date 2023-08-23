@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
 /**
@@ -25,6 +26,15 @@ class AppUpdater {
   }
 }
 
+const execCommand = (command: string) => {
+  exec(`${command}`, (error, stdout) => {
+    console.log(`@DEBUG:: stdout: ${stdout}`);
+    if (error) {
+      console.error(`@DEBUG:: error: ${error}`);
+    }
+  });
+};
+
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -42,24 +52,25 @@ const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 const runPython = async () => {
-  const basePath = path.join(__dirname, '..', '..');
-  const pythonBinary = 'python3';
-  let pythonScript = path.join(basePath, 'py', 'http_server.py');
-  if (isDebug) {
-    pythonScript = path.join(
-      basePath,
-      'release',
-      'app',
-      'py',
-      'http_server.py'
-    );
-  }
-  exec(`${pythonBinary} ${pythonScript}`, (error, stdout) => {
-    console.log(`stdout: ${stdout}`);
-    if (error) {
-      console.error(`@DEBUG:: error: ${error}`);
+  try {
+    const basePath = path.join(__dirname, '..', '..');
+    const rootPath = path.join(basePath, '..');
+    const pythonBinary = 'python3';
+    let pythonScript = path.join(basePath, 'py', 'http_server.py');
+    if (isDebug) {
+      pythonScript = path.join(
+        basePath,
+        'release',
+        'app',
+        'py',
+        'http_server.py'
+      );
     }
-  });
+    // execCommand(`${rootPath}/run.sh`);
+    // execCommand(`python3 ${rootPath}/convopilot/record_audio.py`);
+  } catch (e) {
+    console.error('@DEBUG:: An error occurred:', e);
+  }
 };
 
 const installExtensions = async () => {
