@@ -1,19 +1,18 @@
-from flask import abort
-from flask import Flask, jsonify, request
-from flask_cors import CORS
+from flask_socketio import SocketIO, emit
+from flask import Flask
 
 import record_audio
 
 app = Flask(__name__)
-CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 session = record_audio.Session()
 
 
-@app.route('/start', methods=['POST'])
-def start():
-    data = request.json
-    print(data)
+@socketio.on('start_recording')
+def handle_start_recording(message):
+    data = message['data']
     output_file = data.get('output_file', 'stdout')
     googledoc_metadata = data.get('googledoc_metadata', None)
 
@@ -24,7 +23,7 @@ def start():
     llm_metadata = None
     if llm_model != None:
         if llm_context is None or llm_prompt is None:
-            abort(400, 'llm_context and llm_prompt is required')
+            emit('error', {'message': 'session already started'})
 
         llm_metadata = {
             "model": llm_model,
@@ -36,19 +35,19 @@ def start():
                   googledoc_metadata=googledoc_metadata)
 
     if not success:
-        abort(500, 'session already started')
+        emit('error', {'message': 'session already started'})
 
-    return {}
+    emit('started', {})
 
 
-@app.route('/stop', methods=['POST'])
-def stop():
+@socketio.on('stop_recording')
+def handle_stop_recording(message):
     success = session.stop()
     if not success:
-        abort(500, 'session not started')
+        emit('error', {'message': 'session not started'})
 
-    return {}
+    emit('stopped', {})
 
 
 if __name__ == '__main__':
-    app.run(port=5555)
+    socketio.run(app, port=5555)

@@ -2,6 +2,10 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
 import './App.css';
 
+const io = require('socket.io-client');
+
+const socket = io('http://127.0.0.1:5555');
+
 function startServer() {
   const data = {
     llm_model: 'gpt-3.5',
@@ -50,7 +54,14 @@ function Hello() {
         <button
           type="button"
           onClick={() => {
-            startServer();
+            socket.emit('start_recording', {
+              data: {
+                llm_model: 'gpt-3.5',
+                llm_prompt:
+                  'Could you summarize the top insights from the conversation in bullet points?',
+                llm_context: 'no context',
+              },
+            });
           }}
         >
           Start
@@ -59,7 +70,7 @@ function Hello() {
           type="button"
           style={{ marginLeft: '10px' }}
           onClick={() => {
-            stopServer();
+            socket.emit('stop_recording', {});
           }}
         >
           Stop
