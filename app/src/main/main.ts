@@ -57,6 +57,8 @@ const runPython = async () => {
     const rootPath = path.join(basePath, '..');
     const pythonBinary = 'python3';
     let pythonScript = path.join(basePath, 'py', 'http_server.py');
+    let venvPath = ''; // TODO: Define in release
+    let convopilotVenvPath = ''; // TODO: Define in release
     if (isDebug) {
       pythonScript = path.join(
         basePath,
@@ -65,7 +67,40 @@ const runPython = async () => {
         'py',
         'http_server.py'
       );
+
+      venvPath = path.join(basePath, 'release', 'app', 'venv');
+      convopilotVenvPath = path.join(
+        venvPath,
+        'lib',
+        'python3.11',
+        'site-packages',
+        'convopilot'
+      );
     }
+
+    try {
+      const childProcess = exec(
+        `source ${venvPath}/bin/activate && which python && python ${convopilotVenvPath}/server.py`
+      );
+
+      childProcess.stdout?.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+      });
+
+      childProcess.stderr?.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+      });
+
+      childProcess.on('close', (code) => {
+        console.log(`Child process exited with code ${code}`);
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    // execCommand(
+    //   'source ../v1/bin/activate && which python &&  python ../convopilot/server.py'
+    // );
     // execCommand(`${rootPath}/run.sh`);
     // execCommand(`python3 ${rootPath}/convopilot/record_audio.py`);
   } catch (e) {

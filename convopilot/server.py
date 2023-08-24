@@ -50,4 +50,4 @@ def handle_stop_recording(message):
 
 
 if __name__ == '__main__':
-    socketio.run(app, port=5555)
+    socketio.run(app, port=5555,allow_unsafe_werkzeug=True)
