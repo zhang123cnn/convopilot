@@ -13,6 +13,7 @@ session = record_audio.Session()
 @socketio.on('start_recording')
 def handle_start_recording(message):
     data = message['data']
+    print('start_recording', data)
     output_file = data.get('output_file', 'stdout')
     googledoc_metadata = data.get('googledoc_metadata', None)
 
