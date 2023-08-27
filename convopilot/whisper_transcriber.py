@@ -1,18 +1,17 @@
 import numpy as np
-from convopilot import google_doc
-from convopilot.interface import AudioTranscriber
+from convopilot.interface import PipelineModule
 
 import whisper
 
 model = whisper.load_model("medium")
 
-class WhisperAudioTranscriber(AudioTranscriber):
+class WhisperAudioTranscriber(PipelineModule):
     def __init__(self, outputfile, gdoc_writer):
         super().__init__()
         self.outputfile = outputfile
         self.gdoc_writer = gdoc_writer
 
-    def transcribe(self):
+    def run(self):
         transcription_data = ""
         while True:
             chunk_data = self.input_queue.get()

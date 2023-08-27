@@ -1,8 +1,8 @@
 import pyaudio
-from convopilot.interface import AudioRecorder
+from convopilot.interface import PipelineModule
 
 
-class PyAudioRecorder(AudioRecorder):
+class PyAudioRecorder(PipelineModule):
     def __init__(self, chunk_duration, rate, channels, chunk, format):
         super().__init__()
         self.p = pyaudio.PyAudio()
@@ -15,7 +15,7 @@ class PyAudioRecorder(AudioRecorder):
                                   input=True, frames_per_buffer=chunk)
         self.should_stop = False
 
-    def record(self):
+    def run(self):
         while not self.should_stop:
             chunk_data = b''
             for _ in range(0, int(self.rate / self.chunk * self.chunk_duration)):

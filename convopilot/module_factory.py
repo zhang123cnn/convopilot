@@ -1,4 +1,4 @@
-from convopilot.interface import AudioRecorder, AudioTranscriber, InsightGenerator
+from convopilot.interface import PipelineModule
 
 
 class ModuleFactory:
@@ -8,20 +8,20 @@ class ModuleFactory:
 
     @classmethod
     def register_recorder(cls, key, recorder):
-        if not issubclass(recorder, AudioRecorder):
-            raise ValueError("Not an AudioRecorder!")
+        if not issubclass(recorder, PipelineModule):
+            raise ValueError("Not an PipelineModule!")
         cls._recorders[key] = recorder
 
     @classmethod
     def register_transcriber(cls, key, transcriber):
-        if not issubclass(transcriber, AudioTranscriber):
-            raise ValueError("Not an AudioTranscriber!")
+        if not issubclass(transcriber, PipelineModule):
+            raise ValueError("Not an PipelineModule!")
         cls._transcribers[key] = transcriber
 
     @classmethod
     def register_insight_generator(cls, key, generator):
-        if not issubclass(generator, InsightGenerator):
-            raise ValueError("Not an InsightGenerator!")
+        if not issubclass(generator, PipelineModule):
+            raise ValueError("Not an PipelineModule!")
         cls._insight_generators[key] = generator
 
     @classmethod

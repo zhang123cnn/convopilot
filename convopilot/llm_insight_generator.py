@@ -1,10 +1,9 @@
 
-from convopilot import google_doc
-from convopilot.interface import InsightGenerator
+from convopilot.interface import PipelineModule
 from convopilot.llm_models import get_llm_model
 
 
-class LLMInsightGenerator(InsightGenerator):
+class LLMInsightGenerator(PipelineModule):
     def __init__(self, llm_metadata, gdoc_writer):
         super().__init__()
         self.model = get_llm_model(llm_metadata['model'])
@@ -12,7 +11,7 @@ class LLMInsightGenerator(InsightGenerator):
         self.llm_prompt = llm_metadata['prompt']
         self.gdoc_writer = gdoc_writer
 
-    def generate(self):
+    def run(self):
         previous_response = ""
         transcription_data = ""
         while True:

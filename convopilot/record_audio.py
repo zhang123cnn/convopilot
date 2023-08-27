@@ -1,12 +1,10 @@
 import argparse
 import pyaudio
 import time
-import threading
-import queue
 
 from dotenv import load_dotenv
 
-from convopilot import google_doc
+from convopilot import google_doc, pipeline
 from convopilot.llm_insight_generator import LLMInsightGenerator
 from convopilot.module_factory import ModuleFactory
 from convopilot.pyaudio_recorder import PyAudioRecorder
@@ -19,28 +17,11 @@ ModuleFactory.register_transcriber('whisper', WhisperAudioTranscriber)
 ModuleFactory.register_insight_generator('llm', LLMInsightGenerator)
 
 
-class Pipeline:
-    def __init__(self):
-        self.modules = {}
-
-    def add_module(self, module_name, module, upstreams=[]):
-        if module_name in self.modules:
-            raise ValueError(f"Module with name {module_name} already exists!")
-
-        for upstream in upstreams:
-            q = queue.Queue()
-            upstream.add_output_queue(q)
-            module.set_input_queue(q)
-
-        self.modules[module_name] = module
-
-
 class Session(object):
     def __init__(self):
-        self.threads = []
-        self.audio_recorder = None
         self.hasStarted = False
-        self.pipeline = Pipeline()
+        self.audio_recorder = None
+        self.pipeline = pipeline.Pipeline()
 
     def start(self, output_file, llm_metadata, googledoc_metadata):
         if (self.hasStarted):
@@ -53,35 +34,24 @@ class Session(object):
             gdoc_writer = google_doc.GoogleDocWriter(
                 googledoc_metadata['name'], googledoc_metadata['folder'])
 
-        executors = []
         self.audio_recorder = ModuleFactory.create_recorder(
             'pyaudio', chunk_duration=30, rate=16000,
             channels=1, chunk=1024, format=pyaudio.paInt16)
 
-        self.pipeline.add_module('pyaudio_recorder', self.audio_recorder)
-
-        executors.append(self.audio_recorder.record)
-
         audio_transcriber = ModuleFactory.create_transcriber(
             'whisper', outputfile=output_file, gdoc_writer=gdoc_writer)
 
+        self.pipeline.add_module('pyaudio_recorder', self.audio_recorder)
         self.pipeline.add_module('whisper_transcriber', audio_transcriber, upstreams=[
                                  self.audio_recorder])
-
-        executors.append(audio_transcriber.transcribe)
 
         if llm_metadata is not None:
             insight_generator = ModuleFactory.create_insight_generator(
                 'llm', llm_metadata=llm_metadata, gdoc_writer=gdoc_writer)
-            executors.append(insight_generator.generate)
             self.pipeline.add_module('llm_insight_generator',
                                      insight_generator, upstreams=[audio_transcriber])
 
-        for executor in executors:
-            thread = threading.Thread(target=executor)
-            self.threads.append(thread)
-            thread.start()
-
+        self.pipeline.start()
         return True
 
     def stop(self):
@@ -90,8 +60,7 @@ class Session(object):
 
         self.hasStarted = False
         self.audio_recorder.stop()
-        for thread in self.threads:
-            thread.join()
+        self.pipeline.wait_until_complete()
 
         return True
 
