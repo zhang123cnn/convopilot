@@ -21,7 +21,7 @@ class Session(object):
     def __init__(self):
         self.hasStarted = False
         self.audio_recorder = None
-        self.pipeline = pipeline.Pipeline()
+        self.pipeline = None
 
     def start(self, output_file, llm_metadata, googledoc_metadata):
         if (self.hasStarted):
@@ -41,6 +41,7 @@ class Session(object):
         audio_transcriber = ModuleFactory.create_transcriber(
             'whisper', outputfile=output_file, gdoc_writer=gdoc_writer)
 
+        self.pipeline = pipeline.Pipeline()
         self.pipeline.add_module('pyaudio_recorder', self.audio_recorder)
         self.pipeline.add_module('whisper_transcriber', audio_transcriber, upstreams=[
                                  self.audio_recorder])
@@ -61,6 +62,7 @@ class Session(object):
         self.hasStarted = False
         self.audio_recorder.stop()
         self.pipeline.wait_until_complete()
+        self.pipeline = None
 
         return True
 
