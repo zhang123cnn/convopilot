@@ -33,13 +33,13 @@ def buildPipeline(output_file, llm_metadata, googledoc_metadata):
     p = pipeline.Pipeline(stop_func=audio_recorder.stop)
     p.add_module('pyaudio_recorder', audio_recorder)
     p.add_module('whisper_transcriber', audio_transcriber,
-                 upstreams=[audio_recorder])
+                 upstreams=['pyaudio_recorder'])
 
     if llm_metadata is not None:
         insight_generator = ModuleFactory.create_insight_generator(
             'llm', llm_metadata=llm_metadata, gdoc_writer=gdoc_writer)
         p.add_module('llm_insight_generator', insight_generator,
-                     upstreams=[audio_transcriber])
+                     upstreams=['whisper_transcriber'])
 
     return p
 

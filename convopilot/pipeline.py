@@ -13,16 +13,20 @@ class Pipeline:
         if module_name in self.modules:
             raise ValueError(f"Module with name {module_name} already exists!")
 
-        for upstream in upstreams:
+        for upstream_name in upstreams:
+            upstream = self.modules.get(upstream_name)
+            if not upstream:
+                raise ValueError(f"Dependency {upstream_name} not found!")
+
             q = queue.Queue()
             upstream.add_output_queue(q)
             module.set_input_queue(q)
 
         self.modules[module_name] = module
 
-    def start(self):
+    def start(self, create_thread_func=threading.Thread):
         for module in self.modules.values():
-            thread = threading.Thread(target=module.run)
+            thread = create_thread_func(target=module.run)
             thread.start()
             self.threads.append(thread)
 

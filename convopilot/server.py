@@ -1,5 +1,6 @@
 from flask_socketio import SocketIO, emit
 from flask import Flask
+from convopilot.interface import PipelineModule
 
 import record_audio
 
@@ -8,6 +9,21 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 pipeline = None
+
+class ServerResponder(PipelineModule):
+    def __init__(self):
+        super().__init__()
+
+    def run(self):
+        while True:
+            latest = self.input_queue.get()
+            if latest is None:
+                break
+
+            print(latest)
+            socketio.emit('llm_insight', {'data': latest})
+        
+        self.output_data(None)
 
 
 @socketio.on('start_recording')
@@ -18,7 +34,6 @@ def handle_start_recording(message):
         emit('error', {'message': 'session already started'})
 
     data = message['data']
-    print('start_recording', data)
     output_file = data.get('output_file', 'stdout')
     googledoc_metadata = data.get('googledoc_metadata', None)
 
@@ -40,6 +55,8 @@ def handle_start_recording(message):
     pipeline = record_audio.buildPipeline(output_file=output_file, llm_metadata=llm_metadata,
                                           googledoc_metadata=googledoc_metadata)
 
+    responder = ServerResponder()
+    pipeline.add_module('server_responder', responder, upstreams=['llm_insight_generator'])
     pipeline.start()
 
     emit('started', {})
