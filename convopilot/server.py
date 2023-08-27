@@ -32,6 +32,7 @@ def handle_start_recording(message):
 
     if pipeline is not None:
         emit('error', {'message': 'session already started'})
+        return
 
     data = message['data']
     output_file = data.get('output_file', 'stdout')
@@ -66,6 +67,7 @@ def handle_start_recording(message):
 def handle_stop_recording(message):
     if pipeline is None:
         emit('error', {'message': 'session not started'})
+        return
 
     pipeline.stop()
 
