@@ -68,14 +68,24 @@ function SessionPreparation({ onSubmit }: {
 function SessionRecording({ onStop }: {
   onStop: () => void
 }) {
+  const [insight, setInsight] = useState('Waiting for insight...');
+
   const handleStopRecording = (event: React.MouseEvent<HTMLButtonElement>) => {
     socket.emit('stop_recording', {});
     onStop();
   };
 
+  socket.on('llm_insight', (data: any) => {
+    console.log(data)
+    setInsight(data.data);
+  });
+
   return (
     <div>
-      <button type="button" onClick={handleStopRecording}>Stop Recording</button>
+      <div contentEditable={false} style={{ width: '100%', height: '500px', overflow: 'auto' }}>{insight}</div>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <button type="button" onClick={handleStopRecording}>Stop Recording</button>
+      </div>
     </div>
   );
 }
@@ -84,7 +94,9 @@ export default function Session() {
   const [recording, setRecording] = useState(false);
   return (
     <div>
-      <h1>Pilot Session</h1>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <h1>Pilot Session</h1>
+      </div>
 
       {!recording
         ? <SessionPreparation onSubmit={() => setRecording(true)} />
