@@ -4,9 +4,10 @@ import threading
 
 
 class Pipeline:
-    def __init__(self):
+    def __init__(self, stop_func):
         self.modules = {}
         self.threads = []
+        self.stop_func = stop_func
 
     def add_module(self, module_name, module, upstreams=[]):
         if module_name in self.modules:
@@ -28,3 +29,7 @@ class Pipeline:
     def wait_until_complete(self):
         for thread in self.threads:
             thread.join()
+
+    def stop(self):
+        self.stop_func()
+        self.wait_until_complete()

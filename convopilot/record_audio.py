@@ -17,54 +17,31 @@ ModuleFactory.register_transcriber('whisper', WhisperAudioTranscriber)
 ModuleFactory.register_insight_generator('llm', LLMInsightGenerator)
 
 
-class Session(object):
-    def __init__(self):
-        self.hasStarted = False
-        self.audio_recorder = None
-        self.pipeline = None
+def buildPipeline(output_file, llm_metadata, googledoc_metadata):
+    gdoc_writer = None
+    if googledoc_metadata is not None:
+        gdoc_writer = google_doc.GoogleDocWriter(
+            googledoc_metadata['name'], googledoc_metadata['folder'])
 
-    def start(self, output_file, llm_metadata, googledoc_metadata):
-        if (self.hasStarted):
-            return False
+    audio_recorder = ModuleFactory.create_recorder(
+        'pyaudio', chunk_duration=30, rate=16000,
+        channels=1, chunk=1024, format=pyaudio.paInt16)
 
-        self.hasStarted = True
+    audio_transcriber = ModuleFactory.create_transcriber(
+        'whisper', outputfile=output_file, gdoc_writer=gdoc_writer)
 
-        gdoc_writer = None
-        if googledoc_metadata is not None:
-            gdoc_writer = google_doc.GoogleDocWriter(
-                googledoc_metadata['name'], googledoc_metadata['folder'])
+    p = pipeline.Pipeline(stop_func=audio_recorder.stop)
+    p.add_module('pyaudio_recorder', audio_recorder)
+    p.add_module('whisper_transcriber', audio_transcriber,
+                 upstreams=[audio_recorder])
 
-        self.audio_recorder = ModuleFactory.create_recorder(
-            'pyaudio', chunk_duration=30, rate=16000,
-            channels=1, chunk=1024, format=pyaudio.paInt16)
+    if llm_metadata is not None:
+        insight_generator = ModuleFactory.create_insight_generator(
+            'llm', llm_metadata=llm_metadata, gdoc_writer=gdoc_writer)
+        p.add_module('llm_insight_generator', insight_generator,
+                     upstreams=[audio_transcriber])
 
-        audio_transcriber = ModuleFactory.create_transcriber(
-            'whisper', outputfile=output_file, gdoc_writer=gdoc_writer)
-
-        self.pipeline = pipeline.Pipeline()
-        self.pipeline.add_module('pyaudio_recorder', self.audio_recorder)
-        self.pipeline.add_module('whisper_transcriber', audio_transcriber, upstreams=[
-                                 self.audio_recorder])
-
-        if llm_metadata is not None:
-            insight_generator = ModuleFactory.create_insight_generator(
-                'llm', llm_metadata=llm_metadata, gdoc_writer=gdoc_writer)
-            self.pipeline.add_module('llm_insight_generator',
-                                     insight_generator, upstreams=[audio_transcriber])
-
-        self.pipeline.start()
-        return True
-
-    def stop(self):
-        if not self.hasStarted:
-            return False
-
-        self.hasStarted = False
-        self.audio_recorder.stop()
-        self.pipeline.wait_until_complete()
-        self.pipeline = None
-
-        return True
+    return p
 
 
 def cli():
@@ -115,14 +92,14 @@ def cli():
             "context": llm_context
         }
 
-    session = Session()
-    session.start(output_file, llm_metadata, googledoc_metadata)
+    p = buildPipeline(output_file, llm_metadata, googledoc_metadata)
+    p.start()
 
     try:
         while True:
             time.sleep(0.1)
     except KeyboardInterrupt:
-        session.stop()
+        p.stop()
 
     print("convopilot stopped.")
 

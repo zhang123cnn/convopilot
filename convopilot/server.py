@@ -7,11 +7,16 @@ app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
-session = record_audio.Session()
+pipeline = None
 
 
 @socketio.on('start_recording')
 def handle_start_recording(message):
+    global pipeline
+
+    if pipeline is not None:
+        emit('error', {'message': 'session already started'})
+
     data = message['data']
     print('start_recording', data)
     output_file = data.get('output_file', 'stdout')
@@ -32,23 +37,23 @@ def handle_start_recording(message):
             "context": llm_context
         }
 
-    success = session.start(output_file=output_file, llm_metadata=llm_metadata,
-                  googledoc_metadata=googledoc_metadata)
+    pipeline = record_audio.buildPipeline(output_file=output_file, llm_metadata=llm_metadata,
+                                          googledoc_metadata=googledoc_metadata)
 
-    if not success:
-        emit('error', {'message': 'session already started'})
+    pipeline.start()
 
     emit('started', {})
 
 
 @socketio.on('stop_recording')
-def handle_stop_recording():
-    success = session.stop()
-    if not success:
+def handle_stop_recording(message):
+    if pipeline is None:
         emit('error', {'message': 'session not started'})
+
+    pipeline.stop()
 
     emit('stopped', {})
 
 
 if __name__ == '__main__':
-    socketio.run(app, port=5555,allow_unsafe_werkzeug=True)
+    socketio.run(app, port=5555, allow_unsafe_werkzeug=True)
