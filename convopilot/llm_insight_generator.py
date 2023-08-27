@@ -5,12 +5,12 @@ from convopilot.llm_models import get_llm_model
 
 
 class LLMInsightGenerator(InsightGenerator):
-    def __init__(self, input_queue, llm_metadata, gdoc_writer):
+    def __init__(self, llm_metadata, gdoc_writer):
+        super().__init__()
         self.model = get_llm_model(llm_metadata['model'])
         self.context = llm_metadata['context']
         self.llm_prompt = llm_metadata['prompt']
         self.gdoc_writer = gdoc_writer
-        self.input_queue = input_queue
 
     def generate(self):
         previous_response = ""
@@ -39,6 +39,8 @@ class LLMInsightGenerator(InsightGenerator):
             response = self.model.generate_text(prompt)
             previous_response = response
             print(response)
+
+            self.output_data(response)
 
         if self.gdoc_writer is not None:
             self.gdoc_writer.insert_paragraph_front(previous_response + "\n")

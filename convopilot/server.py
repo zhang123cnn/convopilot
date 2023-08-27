@@ -42,7 +42,7 @@ def handle_start_recording(message):
 
 
 @socketio.on('stop_recording')
-def handle_stop_recording(message):
+def handle_stop_recording():
     success = session.stop()
     if not success:
         emit('error', {'message': 'session not started'})

@@ -3,7 +3,8 @@ from convopilot.interface import AudioRecorder
 
 
 class PyAudioRecorder(AudioRecorder):
-    def __init__(self, output_queue, chunk_duration, rate, channels, chunk, format):
+    def __init__(self, chunk_duration, rate, channels, chunk, format):
+        super().__init__()
         self.p = pyaudio.PyAudio()
         self.chunk_duration = chunk_duration
         self.rate = rate
@@ -12,7 +13,6 @@ class PyAudioRecorder(AudioRecorder):
 
         self.stream = self.p.open(format=format, channels=channels, rate=rate,
                                   input=True, frames_per_buffer=chunk)
-        self.output_queue = output_queue
         self.should_stop = False
 
     def record(self):
@@ -23,9 +23,11 @@ class PyAudioRecorder(AudioRecorder):
                     break
                 data = self.stream.read(self.chunk)
                 chunk_data += data
-            self.output_queue.put(chunk_data)
 
-        self.output_queue.put(None)
+            self.output_data(chunk_data)
+
+        self.output_data(None)
+
         self.stream.stop_stream()
         self.stream.close()
         self.p.terminate()
