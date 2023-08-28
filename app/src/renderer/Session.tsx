@@ -4,19 +4,20 @@ const io = require('socket.io-client');
 
 const socket = io('http://127.0.0.1:5555');
 
-function SessionPreparation({ onSubmit }: {
+function SessionPreparation({ onSubmit, prompt, setPrompt }: {
   onSubmit: () => void;
+  prompt: string,
+  setPrompt: (prompt: string) => void;
 }) {
-  const [input1, setInput1] = useState('');
-  const [input2, setInput2] = useState('Could you summarize the top insights from the conversation in bullet points?');
+  const [context, setContext] = useState('');
   const [dropdownValue, setDropdownValue] = useState('');
 
-  const handleInput1Change = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput1(event.target.value);
+  const handleContextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContext(event.target.value);
   };
 
-  const handleInput2Change = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput2(event.target.value);
+  const handlePromptChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(event.target.value);
   };
 
   const handleDropdownChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -28,8 +29,8 @@ function SessionPreparation({ onSubmit }: {
     socket.emit('start_recording', {
       data: {
         llm_model: dropdownValue === "" ? null : dropdownValue,
-        llm_prompt: input2,
-        llm_context: input1,
+        llm_prompt: prompt,
+        llm_context: context,
       },
     });
     onSubmit();
@@ -49,13 +50,13 @@ function SessionPreparation({ onSubmit }: {
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <label>
           Context:
-          <textarea style={{ width: '100%', height: '100px' }} value={input1} onChange={handleInput1Change} placeholder="Enter context for your conversation so LLM can understand better" />
+          <textarea style={{ width: '100%', height: '100px' }} value={context} onChange={handleContextChange} placeholder="Enter context for your conversation so LLM can understand better" />
         </label>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <label>
           Prompt:
-          <textarea style={{ width: '100%', height: '100px' }} value={input2} onChange={handleInput2Change} />
+          <textarea style={{ width: '100%', height: '100px' }} value={prompt} onChange={handlePromptChange} />
         </label>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -65,8 +66,9 @@ function SessionPreparation({ onSubmit }: {
   );
 }
 
-function SessionRecording({ onStop }: {
-  onStop: () => void
+function SessionRecording({ onStop, prompt }: {
+  onStop: () => void,
+  prompt: string,
 }) {
   const [insight, setInsight] = useState('Waiting for insight...');
 
@@ -81,8 +83,9 @@ function SessionRecording({ onStop }: {
   });
 
   return (
-    <div>
-      <div contentEditable={false} style={{ width: '100%', height: '500px', overflow: 'auto' }}>{insight}</div>
+    <div >
+      <h3 style={{ textAlign: 'center' }}> Prompt: {prompt} </h3>
+      <div contentEditable={false} style={{ height: '400px', overflow: 'auto' }}>{insight}</div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <button type="button" onClick={handleStopRecording}>Stop Recording</button>
       </div>
@@ -92,6 +95,7 @@ function SessionRecording({ onStop }: {
 
 export default function Session() {
   const [recording, setRecording] = useState(false);
+  const [prompt, setPrompt] = useState('Could you summarize the top insights from the conversation in bullet points?');
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -99,8 +103,8 @@ export default function Session() {
       </div>
 
       {!recording
-        ? <SessionPreparation onSubmit={() => setRecording(true)} />
-        : <SessionRecording onStop={() => setRecording(false)} />}
+        ? <SessionPreparation onSubmit={() => setRecording(true)} prompt={prompt} setPrompt={setPrompt} />
+        : <SessionRecording onStop={() => setRecording(false)} prompt={prompt} />}
     </div>
   );
 }
