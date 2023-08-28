@@ -16,11 +16,10 @@ class ServerResponder(PipelineModule):
 
     def run(self):
         while True:
-            latest = self.input_queue.get()
+            latest, _ = self.input_queue.get()
             if latest is None:
                 break
 
-            print(latest)
             socketio.emit('llm_insight', {'data': latest})
         
         self.output_data(None)

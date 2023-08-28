@@ -4,8 +4,8 @@ from convopilot.llm_models import get_llm_model
 
 
 class LLMInsightGenerator(PipelineModule):
-    def __init__(self, llm_metadata, gdoc_writer):
-        super().__init__()
+    def __init__(self, name, llm_metadata, gdoc_writer):
+        super().__init__(name)
         self.model = get_llm_model(llm_metadata['model'])
         self.context = llm_metadata['context']
         self.llm_prompt = llm_metadata['prompt']
@@ -15,7 +15,7 @@ class LLMInsightGenerator(PipelineModule):
         previous_response = ""
         transcription_data = ""
         while True:
-            latest = self.input_queue.get()
+            latest, _ = self.input_queue.get()
             if latest is None:
                 break
 

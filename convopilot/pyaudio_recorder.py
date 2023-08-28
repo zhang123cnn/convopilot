@@ -3,8 +3,8 @@ from convopilot.interface import PipelineModule
 
 
 class PyAudioRecorder(PipelineModule):
-    def __init__(self, chunk_duration, rate, channels, chunk, format):
-        super().__init__()
+    def __init__(self, name, chunk_duration, rate, channels, chunk, format):
+        super().__init__(name)
         self.p = pyaudio.PyAudio()
         self.chunk_duration = chunk_duration
         self.rate = rate

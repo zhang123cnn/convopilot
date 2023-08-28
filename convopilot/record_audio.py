@@ -24,22 +24,20 @@ def buildPipeline(output_file, llm_metadata, googledoc_metadata):
             googledoc_metadata['name'], googledoc_metadata['folder'])
 
     audio_recorder = ModuleFactory.create_recorder(
-        'pyaudio', chunk_duration=15, rate=16000,
+        'pyaudio', name='pyaudio_recorder', chunk_duration=15, rate=16000,
         channels=1, chunk=1024, format=pyaudio.paInt16)
 
     audio_transcriber = ModuleFactory.create_transcriber(
-        'whisper', outputfile=output_file, gdoc_writer=gdoc_writer)
+        'whisper', name='whisper_transcriber', outputfile=output_file, gdoc_writer=gdoc_writer)
 
     p = pipeline.Pipeline(stop_func=audio_recorder.stop)
-    p.add_module('pyaudio_recorder', audio_recorder)
-    p.add_module('whisper_transcriber', audio_transcriber,
-                 upstreams=['pyaudio_recorder'])
+    p.add_module(audio_recorder)
+    p.add_module(audio_transcriber, upstreams=['pyaudio_recorder'])
 
     if llm_metadata is not None:
         insight_generator = ModuleFactory.create_insight_generator(
-            'llm', llm_metadata=llm_metadata, gdoc_writer=gdoc_writer)
-        p.add_module('llm_insight_generator', insight_generator,
-                     upstreams=['whisper_transcriber'])
+            'llm', name='llm_insight_generator', llm_metadata=llm_metadata, gdoc_writer=gdoc_writer)
+        p.add_module(insight_generator, upstreams=['whisper_transcriber'])
 
     return p
 

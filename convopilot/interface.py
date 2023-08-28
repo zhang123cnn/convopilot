@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
 class PipelineModule(ABC):
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.input_queue = None
         self.output_queues = []
 
@@ -13,7 +14,7 @@ class PipelineModule(ABC):
 
     def output_data(self, data):
         for queue in self.output_queues:
-            queue.put(data)
+            queue.put((data, self.name))
 
     @abstractmethod
     def run(self):

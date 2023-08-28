@@ -9,7 +9,8 @@ class Pipeline:
         self.threads = []
         self.stop_func = stop_func
 
-    def add_module(self, module_name, module, upstreams=[]):
+    def add_module(self, module, upstreams=[]):
+        module_name = module.name
         if module_name in self.modules:
             raise ValueError(f"Module with name {module_name} already exists!")
 

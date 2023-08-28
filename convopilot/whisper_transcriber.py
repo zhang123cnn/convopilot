@@ -6,15 +6,15 @@ import whisper
 model = whisper.load_model("medium")
 
 class WhisperAudioTranscriber(PipelineModule):
-    def __init__(self, outputfile, gdoc_writer):
-        super().__init__()
+    def __init__(self, name, outputfile, gdoc_writer):
+        super().__init__(name)
         self.outputfile = outputfile
         self.gdoc_writer = gdoc_writer
 
     def run(self):
         transcription_data = ""
         while True:
-            chunk_data = self.input_queue.get()
+            chunk_data, _ = self.input_queue.get()
             if (chunk_data is None):
                 break
             data = np.frombuffer(chunk_data, np.int16).flatten().astype(
