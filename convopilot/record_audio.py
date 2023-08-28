@@ -24,7 +24,7 @@ def buildPipeline(output_file, llm_metadata, googledoc_metadata):
             googledoc_metadata['name'], googledoc_metadata['folder'])
 
     audio_recorder = ModuleFactory.create_recorder(
-        'pyaudio', chunk_duration=10, rate=16000,
+        'pyaudio', chunk_duration=15, rate=16000,
         channels=1, chunk=1024, format=pyaudio.paInt16)
 
     audio_transcriber = ModuleFactory.create_transcriber(

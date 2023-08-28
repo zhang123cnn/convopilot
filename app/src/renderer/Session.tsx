@@ -11,6 +11,7 @@ function SessionPreparation({ onSubmit, prompt, setPrompt }: {
 }) {
   const [context, setContext] = useState('');
   const [dropdownValue, setDropdownValue] = useState('');
+  const [useGoogleDoc, setUseGoogleDoc] = useState(false);
 
   const handleContextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContext(event.target.value);
@@ -31,6 +32,10 @@ function SessionPreparation({ onSubmit, prompt, setPrompt }: {
         llm_model: dropdownValue === "" ? null : dropdownValue,
         llm_prompt: prompt,
         llm_context: context,
+        googledoc_metadata: useGoogleDoc ? {
+          name: 'Untitled',
+          folder: '',
+        } : null,
       },
     });
     onSubmit();
@@ -57,6 +62,12 @@ function SessionPreparation({ onSubmit, prompt, setPrompt }: {
         <label>
           Prompt:
           <textarea style={{ width: '100%', height: '100px' }} value={prompt} onChange={handlePromptChange} />
+        </label>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <label>
+          Use Google Doc:
+          <input type="checkbox" checked={useGoogleDoc} onChange={(e) => setUseGoogleDoc(e.target.checked)} />
         </label>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
