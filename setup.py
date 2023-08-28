@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='convopilot',
-    version='0.1.4',
+    version='0.2.0',
     packages=find_packages(include=['convopilot']),
     license="MIT",
     author="Xiaomeng Zhang",
@@ -16,7 +16,8 @@ setup(
     readme='README.md',
     entry_points={
         'console_scripts': [
-            'convopilot=convopilot.record_audio:cli'
+            'convopilot=convopilot.record_audio:cli',
+            'convopilot-server=convopilot.server:main'
         ]
     },
 )

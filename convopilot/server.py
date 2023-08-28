@@ -2,7 +2,7 @@ from flask_socketio import SocketIO, emit
 from flask import Flask
 from convopilot.interface import PipelineModule
 
-import record_audio
+from convopilot import record_audio
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -73,6 +73,9 @@ def handle_stop_recording(message):
 
     emit('stopped', {})
 
+def main():
+    socketio.run(app, port=5555, allow_unsafe_werkzeug=True)
+
 
 if __name__ == '__main__':
-    socketio.run(app, port=5555, allow_unsafe_werkzeug=True)
+    main()
