@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='convopilot',
-    version='0.2.0',
+    version='0.2.1',
     packages=find_packages(include=['convopilot']),
     license="MIT",
     author="Xiaomeng Zhang",
