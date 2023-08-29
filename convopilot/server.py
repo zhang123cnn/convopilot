@@ -11,18 +11,14 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 pipeline = None
 
 class ServerResponder(PipelineModule):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, name):
+        super().__init__(name)
 
-    def run(self):
-        while True:
-            latest, _ = self.input_queue.get()
-            if latest is None:
-                break
+    def process(self, data, source):
+        socketio.emit('llm_insight', {'data': data})
 
-            socketio.emit('llm_insight', {'data': latest})
-        
-        self.output_data(None)
+    def onFinish(self):
+        print("Stopped server responder.")
 
 
 @socketio.on('start_recording')
@@ -55,8 +51,8 @@ def handle_start_recording(message):
     pipeline = record_audio.buildPipeline(output_file=output_file, llm_metadata=llm_metadata,
                                           googledoc_metadata=googledoc_metadata)
 
-    responder = ServerResponder()
-    pipeline.add_module('server_responder', responder, upstreams=['llm_insight_generator'])
+    responder = ServerResponder('server_responder')
+    pipeline.add_module(responder, upstreams=['llm_insight_generator'])
     pipeline.start()
 
     emit('started', {})

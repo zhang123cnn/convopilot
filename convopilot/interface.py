@@ -5,6 +5,7 @@ class PipelineModule(ABC):
         self.name = name
         self.input_queue = None
         self.output_queues = []
+        self.should_stop = False
 
     def set_input_queue(self, q):
         self.input_queue = q
@@ -16,6 +17,28 @@ class PipelineModule(ABC):
         for queue in self.output_queues:
             queue.put((data, self.name))
 
-    @abstractmethod
     def run(self):
+        while not self.should_stop:
+            if (self.input_queue is None):
+                self.process(None, None)
+                continue
+
+            data, source = self.input_queue.get()
+            if data is None:
+                break
+
+            self.process(data, source)
+
+        self.output_data(None)
+        self.onFinish()
+
+    def stop(self):
+        self.should_stop = True
+
+    @abstractmethod
+    def process(self, data, source):
+        pass
+
+    @abstractmethod
+    def onFinish(self):
         pass
