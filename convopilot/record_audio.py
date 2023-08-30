@@ -4,7 +4,7 @@ import time
 
 from dotenv import load_dotenv
 
-from convopilot import google_doc, pipeline
+from convopilot import google_doc, pipeline, file_writer
 from convopilot.llm_insight_generator import LLMInsightGenerator
 from convopilot.module_factory import ModuleFactory
 from convopilot.pyaudio_recorder import PyAudioRecorder
@@ -16,19 +16,22 @@ ModuleFactory.register_recorder('pyaudio', PyAudioRecorder)
 ModuleFactory.register_transcriber('whisper', WhisperAudioTranscriber)
 ModuleFactory.register_insight_generator('llm', LLMInsightGenerator)
 
-
 def buildPipeline(output_dir, llm_metadata, googledoc_metadata):
     gdoc_writer = None
     if googledoc_metadata is not None:
         gdoc_writer = google_doc.GoogleDocWriter(
             googledoc_metadata['name'], googledoc_metadata['folder'])
 
+    writer = None
+    if output_dir != "":
+        writer = file_writer.FileWriter(output_dir)
+
     audio_recorder = ModuleFactory.create_recorder(
         'pyaudio', name='pyaudio_recorder', chunk_duration=15, rate=16000,
         channels=1, chunk=1024, format=pyaudio.paInt16)
 
     audio_transcriber = ModuleFactory.create_transcriber(
-        'whisper', name='whisper_transcriber', output_dir=output_dir, gdoc_writer=gdoc_writer)
+        'whisper', name='whisper_transcriber', file_writer=writer, gdoc_writer=gdoc_writer)
 
     p = pipeline.Pipeline(stop_func=audio_recorder.stop)
     p.add_module(audio_recorder)

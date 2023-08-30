@@ -1,4 +1,3 @@
-import os
 import numpy as np
 from convopilot.interface import PipelineModule
 
@@ -8,9 +7,9 @@ model = whisper.load_model("medium")
 
 
 class WhisperAudioTranscriber(PipelineModule):
-    def __init__(self, name, output_dir, gdoc_writer):
+    def __init__(self, name, file_writer, gdoc_writer):
         super().__init__(name)
-        self.output_dir = output_dir
+        self.file_writer = file_writer
         self.gdoc_writer = gdoc_writer
         self.transcription_data = ""
 
@@ -25,13 +24,9 @@ class WhisperAudioTranscriber(PipelineModule):
         self.transcription_data += text
 
     def onFinish(self):
-        # open local file to append result into it
-        if self.output_dir == "":
-            print(self.transcription_data)
-        else:
-            file_path = os.path.join(self.output_dir, "transcription.txt")
-            with open(file_path, "w") as f:
-                f.write(self.transcription_data)
+        if self.file_writer is not None:
+            self.file_writer.write("transcription.txt",
+                                   self.transcription_data)
 
         if self.gdoc_writer is not None:
             self.gdoc_writer.insert_paragraph_front(
