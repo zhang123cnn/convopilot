@@ -20,17 +20,17 @@ class WhisperAudioTranscriber(PipelineModule):
         result = model.transcribe(chunk_data)
         text = result['text']
 
-        # open local file to append result into it
-        if self.outputfile == "stdout":
-            print(text)
-        else:
-            with open(self.outputfile, "a") as f:
-                f.write(text)
-
         self.output_data(text)
         self.transcription_data += text
 
     def onFinish(self):
+        # open local file to append result into it
+        if self.outputfile == "stdout":
+            print(self.transcription_data)
+        else:
+            with open(self.outputfile, "a") as f:
+                f.write(self.transcription_data)
+
         if self.gdoc_writer is not None:
             self.gdoc_writer.insert_paragraph_front(
                 self.transcription_data + "\n")
