@@ -17,7 +17,7 @@ ModuleFactory.register_transcriber('whisper', WhisperAudioTranscriber)
 ModuleFactory.register_insight_generator('llm', LLMInsightGenerator)
 
 
-def buildPipeline(output_file, llm_metadata, googledoc_metadata):
+def buildPipeline(output_dir, llm_metadata, googledoc_metadata):
     gdoc_writer = None
     if googledoc_metadata is not None:
         gdoc_writer = google_doc.GoogleDocWriter(
@@ -28,7 +28,7 @@ def buildPipeline(output_file, llm_metadata, googledoc_metadata):
         channels=1, chunk=1024, format=pyaudio.paInt16)
 
     audio_transcriber = ModuleFactory.create_transcriber(
-        'whisper', name='whisper_transcriber', outputfile=output_file, gdoc_writer=gdoc_writer)
+        'whisper', name='whisper_transcriber', output_dir=output_dir, gdoc_writer=gdoc_writer)
 
     p = pipeline.Pipeline(stop_func=audio_recorder.stop)
     p.add_module(audio_recorder)
@@ -46,8 +46,8 @@ def cli():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("--output_file", "-o", type=str,
-                        default="stdout", help="file to save the outputs")
+    parser.add_argument("--output_dir", "-o", type=str,
+                        default="", help="directory to save the outputs")
     parser.add_argument("--llm_model", "-m", type=str, default="none",
                         help="llm model to use for conversation analysis")
     parser.add_argument("--llm_prompt", "-p", type=str, default="Could you summarize the top insights from the conversation in bullet points?",
@@ -63,7 +63,7 @@ def cli():
                         help="folder of the google doc to save the outputs")
 
     args = parser.parse_args().__dict__
-    output_file: str = args.pop("output_file")
+    output_dir: str = args.pop("output_dir")
     llm_model: str = args.pop("llm_model")
     llm_prompt: str = args.pop("llm_prompt")
     llm_context: str = args.pop("llm_context")
@@ -90,7 +90,7 @@ def cli():
             "context": llm_context
         }
 
-    p = buildPipeline(output_file, llm_metadata, googledoc_metadata)
+    p = buildPipeline(output_dir, llm_metadata, googledoc_metadata)
     p.start()
 
     try:
