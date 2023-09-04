@@ -14,6 +14,8 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { exec } from 'child_process';
+import { spawn } from 'child-process-promise';
+import cp from 'child-process-es6-promise';
 import Constants from './utils/Constants';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
@@ -61,6 +63,16 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
+function extractPythonVersion(inputString: string) {
+  const pattern = /Python (\d+\.\d+)/;
+  const match = inputString.match(pattern);
+
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
+}
+
 const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
@@ -82,10 +94,20 @@ const runPython = async () => {
       );
 
       venvPath = path.join(basePath, 'release', 'app', 'venv');
+
+      const pythonVersion = await cp.exec(
+        `source ${venvPath}/bin/activate && python --version`,
+        []
+      );
+      console.log('@DEBUG:: output:: pythonVersion');
+      console.log(extractPythonVersion(pythonVersion.stdout.toString()));
+      const cleanedPythonVersion = extractPythonVersion(
+        pythonVersion.stdout.toString()
+      );
       convopilotVenvPath = path.join(
         venvPath,
         'lib',
-        'python3.11',
+        `python${cleanedPythonVersion}`,
         'site-packages',
         'convopilot'
       );
@@ -101,7 +123,7 @@ const runPython = async () => {
       });
 
       childProcess.stderr?.on('data', (data) => {
-        console.error(`stderr: ${data}`);
+        console.error(`@DEBUG:: stderr: ${data}`);
       });
 
       childProcess.on('close', (code) => {
