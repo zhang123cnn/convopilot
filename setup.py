@@ -7,6 +7,7 @@ setup(
     name='convopilot',
     version='0.2.2',
     packages=find_packages(include=['convopilot']),
+    package_data={'convopilot': ['bin/ffmpeg']},
     license="MIT",
     author="Xiaomeng Zhang",
     author_email="zhang123cnn@gmail.com",

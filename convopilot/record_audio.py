@@ -1,3 +1,17 @@
+import os
+import shutil
+
+ffmpeg_path = os.environ.get('FFMPEG_PATH')
+if ffmpeg_path:
+    os.environ['PATH'] = f"{ffmpeg_path}:{os.environ['PATH']}"
+
+ffmpeg_executable = shutil.which('ffmpeg')
+
+if ffmpeg_executable:
+    print(f"FFmpeg is located at: {ffmpeg_executable}")
+else:
+    print("FFmpeg is not found.")
+
 import argparse
 import pyaudio
 import time
