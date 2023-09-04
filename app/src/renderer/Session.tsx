@@ -4,24 +4,34 @@ const io = require('socket.io-client');
 
 const socket = io('http://127.0.0.1:5555');
 
-function SessionPreparation({ onSubmit, prompt, setPrompt }: {
+function SessionPreparation({
+  onSubmit,
+  prompt,
+  setPrompt,
+}: {
   onSubmit: () => void;
-  prompt: string,
+  prompt: string;
   setPrompt: (prompt: string) => void;
 }) {
   const [context, setContext] = useState('');
   const [dropdownValue, setDropdownValue] = useState('');
   const [useGoogleDoc, setUseGoogleDoc] = useState(false);
 
-  const handleContextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleContextChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setContext(event.target.value);
   };
 
-  const handlePromptChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handlePromptChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setPrompt(event.target.value);
   };
 
-  const handleDropdownChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleDropdownChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setDropdownValue(event.target.value);
   };
 
@@ -29,13 +39,15 @@ function SessionPreparation({ onSubmit, prompt, setPrompt }: {
     event.preventDefault();
     socket.emit('start_recording', {
       data: {
-        llm_model: dropdownValue === "" ? null : dropdownValue,
+        llm_model: dropdownValue === '' ? null : dropdownValue,
         llm_prompt: prompt,
         llm_context: context,
-        googledoc_metadata: useGoogleDoc ? {
-          name: 'Untitled',
-          folder: '',
-        } : null,
+        googledoc_metadata: useGoogleDoc
+          ? {
+              name: 'Untitled',
+              folder: '',
+            }
+          : null,
       },
     });
     onSubmit();
@@ -55,19 +67,32 @@ function SessionPreparation({ onSubmit, prompt, setPrompt }: {
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <label>
           Context:
-          <textarea style={{ width: '100%', height: '100px' }} value={context} onChange={handleContextChange} placeholder="Enter context for your conversation so LLM can understand better" />
+          <textarea
+            style={{ width: '100%', height: '100px' }}
+            value={context}
+            onChange={handleContextChange}
+            placeholder="Enter context for your conversation so LLM can understand better"
+          />
         </label>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <label>
           Prompt:
-          <textarea style={{ width: '100%', height: '100px' }} value={prompt} onChange={handlePromptChange} />
+          <textarea
+            style={{ width: '100%', height: '100px' }}
+            value={prompt}
+            onChange={handlePromptChange}
+          />
         </label>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <label>
           Use Google Doc:
-          <input type="checkbox" checked={useGoogleDoc} onChange={(e) => setUseGoogleDoc(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={useGoogleDoc}
+            onChange={(e) => setUseGoogleDoc(e.target.checked)}
+          />
         </label>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -77,9 +102,12 @@ function SessionPreparation({ onSubmit, prompt, setPrompt }: {
   );
 }
 
-function SessionRecording({ onStop, prompt }: {
-  onStop: () => void,
-  prompt: string,
+function SessionRecording({
+  onStop,
+  prompt,
+}: {
+  onStop: () => void;
+  prompt: string;
 }) {
   const [insight, setInsight] = useState('Waiting for insight...');
 
@@ -89,16 +117,23 @@ function SessionRecording({ onStop, prompt }: {
   };
 
   socket.on('llm_insight', (data: any) => {
-    console.log(data)
+    console.log(data);
     setInsight(data.data);
   });
 
   return (
-    <div >
+    <div>
       <h3 style={{ textAlign: 'center' }}> Prompt: {prompt} </h3>
-      <div contentEditable={false} style={{ height: '400px', overflow: 'auto' }}>{insight}</div>
+      <div
+        contentEditable={false}
+        style={{ height: '400px', overflow: 'auto' }}
+      >
+        {insight}
+      </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <button type="button" onClick={handleStopRecording}>Stop Recording</button>
+        <button type="button" onClick={handleStopRecording}>
+          Stop Recording
+        </button>
       </div>
     </div>
   );
@@ -106,17 +141,24 @@ function SessionRecording({ onStop, prompt }: {
 
 export default function Session() {
   const [recording, setRecording] = useState(false);
-  const [prompt, setPrompt] = useState('Could you summarize the top insights from the conversation in bullet points?');
+  const [prompt, setPrompt] = useState(
+    'Could you summarize the top insights from the conversation in bullet points?'
+  );
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <h1>Pilot Session</h1>
       </div>
 
-      {!recording
-        ? <SessionPreparation onSubmit={() => setRecording(true)} prompt={prompt} setPrompt={setPrompt} />
-        : <SessionRecording onStop={() => setRecording(false)} prompt={prompt} />}
+      {!recording ? (
+        <SessionPreparation
+          onSubmit={() => setRecording(true)}
+          prompt={prompt}
+          setPrompt={setPrompt}
+        />
+      ) : (
+        <SessionRecording onStop={() => setRecording(false)} prompt={prompt} />
+      )}
     </div>
   );
 }
-

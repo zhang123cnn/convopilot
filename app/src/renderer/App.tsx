@@ -1,8 +1,13 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  useNavigate,
+  MemoryRouter as Router,
+  Routes,
+  Route,
+} from 'react-router-dom';
 import icon from '../../assets/icon.svg';
 import './App.css';
 
-import { useNavigate } from 'react-router-dom';
+import Session from './Session';
 
 function Hello() {
   const navigate = useNavigate();
@@ -25,8 +30,6 @@ function Hello() {
     </div>
   );
 }
-
-import Session from './Session';
 
 export default function App() {
   return (
