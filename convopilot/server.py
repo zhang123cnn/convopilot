@@ -31,6 +31,10 @@ def handle_start_recording(message):
 
     data = message['data']
     output_file = data.get('output_file', 'stdout')
+    output_dir = data.get('output_dir', 'stdout')
+    print(f"Output file: {output_file}")
+    print(f"Output dir: {output_dir}")
+
     googledoc_metadata = data.get('googledoc_metadata', None)
 
     llm_model = data.get('llm_model', None)
@@ -48,7 +52,7 @@ def handle_start_recording(message):
             "context": llm_context
         }
 
-    pipeline = record_audio.buildPipeline(output_file=output_file, llm_metadata=llm_metadata,
+    pipeline = record_audio.buildPipeline(output_dir=output_dir, llm_metadata=llm_metadata,
                                           googledoc_metadata=googledoc_metadata)
 
     responder = ServerResponder('server_responder')
