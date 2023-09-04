@@ -115,8 +115,17 @@ const runPython = async () => {
     }
 
     try {
+      if (!process.env.OPENAI_API_KEY) {
+        console.error(
+          '@DEBUG:: OpenAI API key not found! Please specify process.env.OPENAI_API_KEY'
+        );
+        return;
+      }
       const childProcess = exec(
-        `source ${venvPath}/bin/activate && export FFMPEG_PATH=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/ &&  which python && python ${convopilotVenvPath}/server.py`
+        `source ${venvPath}/bin/activate &&
+         export FFMPEG_PATH=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/ &&
+         export OPENAI_API_KEY=${process.env.OPENAI_API_KEY} &&
+          which python && python ${convopilotVenvPath}/server.py`
       );
 
       childProcess.stdout?.on('data', (data) => {
