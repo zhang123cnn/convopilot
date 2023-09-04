@@ -84,6 +84,7 @@ const runPython = async () => {
     let pythonScript = path.join(basePath, 'py', 'http_server.py');
     let venvPath = ''; // TODO: Define in release
     let convopilotVenvPath = ''; // TODO: Define in release
+    let cleanedPythonVersion: string | null = '';
     if (isDebug) {
       pythonScript = path.join(
         basePath,
@@ -101,7 +102,7 @@ const runPython = async () => {
       );
       console.log('@DEBUG:: output:: pythonVersion');
       console.log(extractPythonVersion(pythonVersion.stdout.toString()));
-      const cleanedPythonVersion = extractPythonVersion(
+      cleanedPythonVersion = extractPythonVersion(
         pythonVersion.stdout.toString()
       );
       convopilotVenvPath = path.join(
@@ -115,7 +116,7 @@ const runPython = async () => {
 
     try {
       const childProcess = exec(
-        `source ${venvPath}/bin/activate && which python && python ${convopilotVenvPath}/server.py`
+        `source ${venvPath}/bin/activate && export FFMPEG_PATH=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/ &&  which python && python ${convopilotVenvPath}/server.py`
       );
 
       childProcess.stdout?.on('data', (data) => {
