@@ -1,2 +1,11 @@
 include requirements.txt
 include convopilot/bin/ffmpeg
+include convopilot/bin/portaudio/lib/libportaudio.2.dylib
+include convopilot/bin/portaudio/lib/libportaudio.a
+include convopilot/bin/portaudio/lib/libportaudio.dylib
+include convopilot/bin/portaudio/lib/libportaudio.la
+include convopilot/bin/portaudio/lib/pkgconfig/portaudio-2.0.pc
+include convopilot/bin/portaudio/lib/pkgconfig/portaudiocpp.pc
+include convopilot/bin/portaudio/lib/libportaudiocpp.0.dylib
+include convopilot/bin/portaudio/lib/libportaudiocpp.a
+include convopilot/bin/portaudio/lib/libportaudiocpp.dylib

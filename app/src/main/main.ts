@@ -125,6 +125,9 @@ const runPython = async () => {
         `source ${venvPath}/bin/activate &&
          export FFMPEG_PATH=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/ &&
          export OPENAI_API_KEY=${process.env.OPENAI_API_KEY} &&
+         export PA_DIR=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/portaudio &&
+         export PKG_CONFIG_PATH=$PA_DIR/pkgconfig &&
+         export LD_LIBRARY_PATH=$PA_DIR/lib &&
           which python && python ${convopilotVenvPath}/server.py`
       );
 

@@ -1,6 +1,19 @@
 import os
 import shutil
+import ctypes.util
 
+LD_LIBRARY_PATH = os.environ.get('LD_LIBRARY_PATH')
+print(f"LD_LIBRARY_PATH: {LD_LIBRARY_PATH}")
+# print(util.find_library('libportaudio.2.dylib'))
+
+library_name = ctypes.util.find_library('libportaudio.2.dylib')
+print(library_name)
+
+import pyaudio
+
+p = pyaudio.PyAudio()
+print("PortAudio version:", pyaudio.get_portaudio_version())
+print("Default input device:", p.get_default_input_device_info())
 ffmpeg_path = os.environ.get('FFMPEG_PATH')
 if ffmpeg_path:
     os.environ['PATH'] = f"{ffmpeg_path}:{os.environ['PATH']}"
@@ -11,6 +24,15 @@ if ffmpeg_executable:
     print(f"FFmpeg is located at: {ffmpeg_executable}")
 else:
     print("FFmpeg is not found.")
+
+portaudio_executable = shutil.which('portaudio')
+
+if portaudio_executable:
+    print(f"portaudio is located at: {portaudio_executable}")
+else:
+    print("portaudio is not found.")
+
+
 
 import argparse
 import pyaudio
