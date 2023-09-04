@@ -42,6 +42,7 @@ function SessionPreparation({
         llm_model: dropdownValue === '' ? null : dropdownValue,
         llm_prompt: prompt,
         llm_context: context,
+        output_dir: './output',
         googledoc_metadata: useGoogleDoc
           ? {
               name: 'Untitled',
