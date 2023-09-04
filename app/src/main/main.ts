@@ -14,9 +14,11 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { exec } from 'child_process';
+import Constants from './utils/Constants';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import TrayGenerator from './TrayGenerator';
+import Messages from './utils/Messages';
 
 class AppUpdater {
   constructor() {
@@ -41,6 +43,17 @@ ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
+});
+
+ipcMain.on(Constants.IPC_MAIN_CHANNEL, async (event, arg) => {
+  const eventName = arg[0];
+  console.log(eventName);
+  if (eventName === Messages.RENDERER_TO_MAIN.INSTALL_DEPS) {
+    event.reply(
+      Constants.IPC_RENDERER_CHANNEL,
+      Messages.MAIN_TO_RENDERER.START_INSTALL_EVENT
+    );
+  }
 });
 
 if (process.env.NODE_ENV === 'production') {
