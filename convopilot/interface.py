@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+import logging
+
 
 class PipelineModule(ABC):
     def __init__(self, name):
@@ -20,17 +22,22 @@ class PipelineModule(ABC):
     def run(self):
         while not self.should_stop:
             if (self.input_queue is None):
-                self.process(None, None)
+                self.process_with_logging(None, None)
                 continue
 
             data, source = self.input_queue.get()
             if data is None:
                 break
 
-            self.process(data, source)
+            self.process_with_logging(data, source)
 
         self.output_data(None)
         self.onFinish()
+
+    def process_with_logging(self, data, source):
+        logging.debug(f'{self.name} - start processing once')
+        self.process(data, source)
+        logging.debug(f'{self.name} - end processing once')
 
     def stop(self):
         self.should_stop = True

@@ -1,3 +1,6 @@
+
+import logging
+import time
 import numpy as np
 from convopilot.interface import PipelineModule
 
@@ -17,8 +20,13 @@ class WhisperAudioTranscriber(PipelineModule):
         chunk_data = np.frombuffer(data, np.int16).flatten().astype(
             np.float32) / 32768.0
 
+        cur_time = time.time()
         result = model.transcribe(chunk_data)
+        after_time = time.time()
+        diff = after_time - cur_time
+        logging.debug(f'{self.name} transcribing takes {diff} secconds')
         text = result['text']
+        logging.debug(f'{self.name} transcribed text: {text}')
 
         self.output_data(text)
         self.transcription_data += text

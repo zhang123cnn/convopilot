@@ -2,6 +2,15 @@ import os
 import shutil
 import ctypes.util
 
+import logging
+
+# Setup basic configuration for logging
+logging.basicConfig(
+    level=logging.INFO, 
+    format='%(asctime)s - %(levelname)s - %(message)s', 
+    handlers=[logging.StreamHandler()]
+)
+
 LD_LIBRARY_PATH = os.environ.get('LD_LIBRARY_PATH')
 print(f"LD_LIBRARY_PATH: {LD_LIBRARY_PATH}")
 # print(util.find_library('libportaudio.2.dylib'))
@@ -63,7 +72,7 @@ def buildPipeline(output_dir, llm_metadata, googledoc_metadata):
         writer = file_writer.FileWriter(output_dir)
 
     audio_recorder = ModuleFactory.create_recorder(
-        'pyaudio', name='pyaudio_recorder', chunk_duration=15, rate=16000,
+        'pyaudio', name='pyaudio_recorder', chunk_duration=5, rate=16000,
         channels=1, chunk=1024, format=pyaudio.paInt16)
 
     audio_transcriber = ModuleFactory.create_transcriber(
