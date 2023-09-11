@@ -13,7 +13,10 @@ class LLMInsightGenerator(PipelineModule):
         self.previous_response = ""
         self.transcription_data = ""
 
-    def process(self, data, source):
+    def process(self, items):
+        # Only cares about the latest data
+        data, source = items[-1]
+
         self.transcription_data += data
 
         prompt = f"""

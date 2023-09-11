@@ -16,8 +16,13 @@ class WhisperAudioTranscriber(PipelineModule):
         self.gdoc_writer = gdoc_writer
         self.transcription_data = ""
 
-    def process(self, data, source):
-        chunk_data = np.frombuffer(data, np.int16).flatten().astype(
+    def process(self, items):
+        logging.debug(f'{self.name} received {len(items)} items')
+        total_data = b''
+        for data, source in items:
+            total_data += data
+
+        chunk_data = np.frombuffer(total_data, np.int16).flatten().astype(
             np.float32) / 32768.0
 
         cur_time = time.time()

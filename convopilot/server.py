@@ -14,7 +14,8 @@ class ServerResponder(PipelineModule):
     def __init__(self, name):
         super().__init__(name)
 
-    def process(self, data, source):
+    def process(self, items):
+        data, source = items[-1]
         socketio.emit('llm_insight', {'data': data})
 
     def onFinish(self):
