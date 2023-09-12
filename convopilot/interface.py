@@ -28,17 +28,19 @@ class PipelineModule(ABC):
 
             items = []
             hasFinished = False
-            while not self.input_queue.empty():
+            while True:
                 data, source = self.input_queue.get()
                 if data is None:
                     hasFinished = True
                     break
                 items.append((data, source))
+
+                if self.input_queue.empty():
+                    self.process_with_logging(items)
+                    break;
             
             if hasFinished:
                 break
-
-            self.process_with_logging(items)
 
         self.output_data(None)
         self.onFinish()
