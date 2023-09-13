@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='convopilot',
-    version='0.2.4',
+    version='0.2.5',
     packages=find_packages(include=['convopilot']),
     package_data={'convopilot': ['bin/ffmpeg',
     'bin/portaudio/lib/libportaudio.2.dylib',

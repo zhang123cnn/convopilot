@@ -14,10 +14,8 @@ class LLMInsightGenerator(PipelineModule):
         self.transcription_data = ""
 
     def process(self, items):
-        # Only cares about the latest data
-        data, source = items[-1]
-
-        self.transcription_data += data
+        for data, source in items:
+            self.transcription_data += data
 
         prompt = f"""
         You are the best AI conversation facilitator. You are helping a group of people have a conversation about a topic. 
