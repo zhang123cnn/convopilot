@@ -26,7 +26,7 @@ class WhisperAudioTranscriber(PipelineModule):
             np.float32) / 32768.0
 
         cur_time = time.time()
-        result = model.transcribe(chunk_data, language="en")
+        result = model.transcribe(chunk_data, language="en", fp16=False)
         after_time = time.time()
         diff = after_time - cur_time
         logging.debug(f'{self.name} transcribing takes {diff} secconds')
