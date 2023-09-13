@@ -6,7 +6,7 @@ from convopilot.interface import PipelineModule
 
 import whisper
 
-model = whisper.load_model("medium")
+model = whisper.load_model("medium.en")
 
 
 class WhisperAudioTranscriber(PipelineModule):
@@ -26,15 +26,31 @@ class WhisperAudioTranscriber(PipelineModule):
             np.float32) / 32768.0
 
         cur_time = time.time()
-        result = model.transcribe(chunk_data)
+        result = model.transcribe(chunk_data, language="en")
         after_time = time.time()
         diff = after_time - cur_time
         logging.debug(f'{self.name} transcribing takes {diff} secconds')
-        text = result['text']
-        logging.debug(f'{self.name} transcribed text: {text}')
+        logging.debug(f'{self.name} transcription raw result: {result}')
 
-        self.output_data(text)
-        self.transcription_data += text
+        text = self.get_text_from_transcribe_result(result)
+
+        if text != "":
+            self.output_data(text)
+            self.transcription_data += text
+
+    def get_text_from_transcribe_result(self, result):
+        text = ""
+        for segment in sorted(result['segments'], key=lambda x: x['start']):
+            if segment['no_speech_prob'] > 0.6:
+                logging.debug(
+                    f'{self.name} no speech ({segment["no_speech_prob"]}) detected from {segment["start"]} to {segment["end"]}. skipping')
+                continue
+
+            text += segment['text']
+
+        logging.debug(f'{self.name} transcribed text: {text}')
+        return text
+
 
     def onFinish(self):
         if self.file_writer is not None:
