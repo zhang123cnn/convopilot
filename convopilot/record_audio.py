@@ -4,13 +4,6 @@ import ctypes.util
 
 import logging
 
-# Setup basic configuration for logging
-logging.basicConfig(
-    level=logging.INFO, 
-    format='%(asctime)s - %(levelname)s - %(message)s', 
-    handlers=[logging.StreamHandler()]
-)
-
 LD_LIBRARY_PATH = os.environ.get('LD_LIBRARY_PATH')
 print(f"LD_LIBRARY_PATH: {LD_LIBRARY_PATH}")
 # print(util.find_library('libportaudio.2.dylib'))
@@ -72,11 +65,11 @@ def buildPipeline(output_dir, llm_metadata, googledoc_metadata):
         writer = file_writer.FileWriter(output_dir)
 
     audio_recorder = ModuleFactory.create_recorder(
-        'pyaudio', name='pyaudio_recorder', chunk_duration=10, rate=16000,
+        'pyaudio', name='pyaudio_recorder', chunk_duration=1, rate=16000,
         channels=1, chunk=1024, format=pyaudio.paInt16)
 
     audio_transcriber = ModuleFactory.create_transcriber(
-        'whisper', name='whisper_transcriber', file_writer=writer, gdoc_writer=gdoc_writer)
+        'whisper', name='whisper_transcriber', file_writer=writer, gdoc_writer=gdoc_writer, batch_size=15)
 
     p = pipeline.Pipeline(stop_func=audio_recorder.stop)
     p.add_module(audio_recorder)
@@ -151,4 +144,11 @@ def cli():
 
 
 if __name__ == "__main__":
+    # Setup basic configuration for logging
+    logging.basicConfig(
+        level=logging.DEBUG, 
+        format='%(asctime)s - %(levelname)s - %(message)s', 
+        handlers=[logging.StreamHandler()]
+    )
+
     cli()

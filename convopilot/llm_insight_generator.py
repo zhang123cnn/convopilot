@@ -1,4 +1,5 @@
 
+import logging
 from convopilot.interface import PipelineModule
 from convopilot.llm_models import get_llm_model
 
@@ -14,8 +15,17 @@ class LLMInsightGenerator(PipelineModule):
         self.transcription_data = ""
 
     def process(self, items):
+        has_final_response = False
         for data, source in items:
-            self.transcription_data += data
+            print(data)
+            is_final = data['is_final']
+            text = data['text']
+            if (is_final):
+                self.transcription_data += text
+                has_final_response = True
+
+        if not has_final_response: 
+            return
 
         prompt = f"""
         You are the best AI conversation facilitator. You are helping a group of people have a conversation about a topic. 
@@ -33,7 +43,7 @@ class LLMInsightGenerator(PipelineModule):
 
         response = self.model.generate_text(prompt)
         self.previous_response = response
-        print(response)
+        logging.debug(f'${self.name} - llm response: ${response}')
 
         self.output_data(response)
 
