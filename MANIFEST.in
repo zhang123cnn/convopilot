@@ -9,3 +9,4 @@ include convopilot/bin/portaudio/lib/pkgconfig/portaudiocpp.pc
 include convopilot/bin/portaudio/lib/libportaudiocpp.0.dylib
 include convopilot/bin/portaudio/lib/libportaudiocpp.a
 include convopilot/bin/portaudio/lib/libportaudiocpp.dylib
+include convopilot/bin/portaudio/include/*

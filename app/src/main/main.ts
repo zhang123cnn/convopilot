@@ -95,7 +95,7 @@ const runPython = async () => {
       );
 
       venvPath = path.join(basePath, 'release', 'app', 'venv');
-
+      console.log("@DEBUG:: venvPath",venvPath);
       const pythonVersion = await cp.exec(
         `source ${venvPath}/bin/activate && python --version`,
         []
@@ -115,19 +115,21 @@ const runPython = async () => {
     }
 
     try {
-      if (!process.env.OPENAI_API_KEY) {
-        console.error(
-          '@DEBUG:: OpenAI API key not found! Please specify process.env.OPENAI_API_KEY'
-        );
-        return;
-      }
+      // if (!process.env.OPENAI_API_KEY) {
+      //   console.error(
+      //     '@DEBUG:: OpenAI API key not found! Please specify process.env.OPENAI_API_KEY'
+      //   );
+      //   return;
+      // }
       const childProcess = exec(
         `source ${venvPath}/bin/activate &&
          export FFMPEG_PATH=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/ &&
          export OPENAI_API_KEY=${process.env.OPENAI_API_KEY} &&
          export PA_DIR=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/portaudio &&
+         export C_INCLUDE_PATH=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/portaudio/include &&
          export PKG_CONFIG_PATH=$PA_DIR/pkgconfig &&
          export LD_LIBRARY_PATH=$PA_DIR/lib &&
+         export LIBRARY_PATH=$PA_DIR/lib &&
           which python && python ${convopilotVenvPath}/server.py`
       );
 
