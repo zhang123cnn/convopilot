@@ -58,7 +58,7 @@ const isDebug =
 
 const runPython = async () => {
   try {
-    const pythonExecutable = path.join(process.resourcesPath, 'convopilot-server');
+    const pythonExecutable = path.join(process.resourcesPath, 'bin/convopilot-server');
     const childProcess = exec(
       `export OPENAI_API_KEY=${process.env.OPENAI_API_KEY} && ${pythonExecutable}`
     );
