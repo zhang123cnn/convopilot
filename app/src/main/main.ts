@@ -14,8 +14,6 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { exec } from 'child_process';
-import { spawn } from 'child-process-promise';
-import cp from 'child-process-es6-promise';
 import Constants from './utils/Constants';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
@@ -63,98 +61,30 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-function extractPythonVersion(inputString: string) {
-  const pattern = /Python (\d+\.\d+)/;
-  const match = inputString.match(pattern);
-
-  if (match && match[1]) {
-    return match[1];
-  }
-  return null;
-}
-
 const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 const runPython = async () => {
   try {
-    const basePath = path.join(__dirname, '..', '..');
-    const rootPath = path.join(basePath, '..');
-    const pythonBinary = 'python3';
-    let pythonScript = path.join(basePath, 'py', 'http_server.py');
-    let venvPath = ''; // TODO: Define in release
-    let convopilotVenvPath = ''; // TODO: Define in release
-    let cleanedPythonVersion: string | null = '';
-    if (isDebug) {
-      pythonScript = path.join(
-        basePath,
-        'release',
-        'app',
-        'py',
-        'http_server.py'
-      );
+    const childProcess = exec(
+      `export OPENAI_API_KEY=${process.env.OPENAI_API_KEY} && /Users/xiaomeng/Projects/conversation-assistant/dist/convopilot-server`
+    );
 
-      venvPath = path.join(basePath, 'release', 'app', 'venv');
+    childProcess.stdout?.on('data', (data) => {
+      console.log(`stdout: ${data}`);
+    });
 
-      const pythonVersion = await cp.exec(
-        `source ${venvPath}/bin/activate && python --version`,
-        []
-      );
-      console.log('@DEBUG:: output:: pythonVersion');
-      console.log(extractPythonVersion(pythonVersion.stdout.toString()));
-      cleanedPythonVersion = extractPythonVersion(
-        pythonVersion.stdout.toString()
-      );
-      convopilotVenvPath = path.join(
-        venvPath,
-        'lib',
-        `python${cleanedPythonVersion}`,
-        'site-packages',
-        'convopilot'
-      );
-    }
+    childProcess.stderr?.on('data', (data) => {
+      console.error(`@DEBUG:: stderr: ${data}`);
+    });
 
-    try {
-      if (!process.env.OPENAI_API_KEY) {
-        console.error(
-          '@DEBUG:: OpenAI API key not found! Please specify process.env.OPENAI_API_KEY'
-        );
-        return;
-      }
-      const childProcess = exec(
-        `source ${venvPath}/bin/activate &&
-         export FFMPEG_PATH=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/ &&
-         export OPENAI_API_KEY=${process.env.OPENAI_API_KEY} &&
-         export PA_DIR=${venvPath}/lib/python${cleanedPythonVersion}/site-packages/convopilot/bin/portaudio &&
-         export PKG_CONFIG_PATH=$PA_DIR/pkgconfig &&
-         export LD_LIBRARY_PATH=$PA_DIR/lib &&
-          which python && python ${convopilotVenvPath}/server.py`
-      );
-
-      childProcess.stdout?.on('data', (data) => {
-        console.log(`stdout: ${data}`);
-      });
-
-      childProcess.stderr?.on('data', (data) => {
-        console.error(`@DEBUG:: stderr: ${data}`);
-      });
-
-      childProcess.on('close', (code) => {
-        console.log(`Child process exited with code ${code}`);
-      });
-    } catch (e) {
-      console.error(e);
-    }
-
-    // execCommand(
-    //   'source ../v1/bin/activate && which python &&  python ../convopilot/server.py'
-    // );
-    // execCommand(`${rootPath}/run.sh`);
-    // execCommand(`python3 ${rootPath}/convopilot/record_audio.py`);
+    childProcess.on('close', (code) => {
+      console.log(`Child process exited with code ${code}`);
+    });
   } catch (e) {
     console.error('@DEBUG:: An error occurred:', e);
   }
-};
+}
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
