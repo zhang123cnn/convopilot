@@ -10,3 +10,4 @@ Run `yarn start`
 
 ## Package an App
 Run `npm run dist`
+Run `release/build/mac-arm64/ConvoPilot.app/Contents/MacOS/ConvoPilot`
