@@ -12,7 +12,6 @@ Run the automatic setup script:
 
 ## Getting started (Mac)
 1. make sure you have installed homebrew and python3
-1. brew install ffmpeg
 1. brew install portaudio
     1. If you homebrew is installed in a non-system directory and you are getting error on portaudio.h and clang, make sure you export the c include path and library path as follows
         1. export C_INCLUDE_PATH=$C_INCLUDE_PATH:[Your local homebrew path]/homebrew/include
