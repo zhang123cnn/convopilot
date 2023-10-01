@@ -28,15 +28,6 @@ class AppUpdater {
   }
 }
 
-const execCommand = (command: string) => {
-  exec(`${command}`, (error, stdout) => {
-    console.log(`@DEBUG:: stdout: ${stdout}`);
-    if (error) {
-      console.error(`@DEBUG:: error: ${error}`);
-    }
-  });
-};
-
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
