@@ -1,14 +1,19 @@
+import time
 from flask_socketio import SocketIO, emit
 from flask import Flask
 from convopilot.interface import PipelineModule
 
 from convopilot import record_audio
 
+# This is to pull in dependency for pyinstaller to work
+from engineio.async_drivers import threading
+
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 pipeline = None
+
 
 class ServerResponder(PipelineModule):
     def __init__(self, name):
@@ -72,6 +77,7 @@ def handle_stop_recording(message):
     pipeline.stop()
 
     emit('stopped', {})
+
 
 def main():
     socketio.run(app, port=5555, allow_unsafe_werkzeug=True)
