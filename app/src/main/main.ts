@@ -55,10 +55,12 @@ if (process.env.NODE_ENV === 'production') {
 const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
+
 const runPython = async () => {
   try {
+    const pythonExecutable = path.join(process.resourcesPath, 'convopilot-server');
     const childProcess = exec(
-      `export OPENAI_API_KEY=${process.env.OPENAI_API_KEY} && /Users/xiaomeng/Projects/conversation-assistant/dist/convopilot-server`
+      `export OPENAI_API_KEY=${process.env.OPENAI_API_KEY} && ${pythonExecutable}`
     );
 
     childProcess.stdout?.on('data', (data) => {
@@ -171,7 +173,10 @@ app
     }
     const Tray = new TrayGenerator(mainWindow);
     Tray.createTray();
-    await runPython();
+
+    if (!isDebug) {
+      await runPython();
+    }
 
     app.on('activate', () => {
       console.log('@DEBUG:: App is activated');
