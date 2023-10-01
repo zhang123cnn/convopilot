@@ -8,4 +8,5 @@ Run `yarn`
 ## Run
 Run `yarn start`
 
-
+## Package an App
+Run `npm run dist`
