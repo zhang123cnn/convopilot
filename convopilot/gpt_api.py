@@ -12,7 +12,10 @@ billing = {
     'gpt-4-32k-0314': 0.06
 }
 
-openai.api_key = os.environ.get('OPENAI_API_KEY')
+def set_openai_key(api_key):
+    openai.api_key = api_key
+
+set_openai_key(os.environ.get('OPENAI_API_KEY'))
 
 class GPTAPI:
     def __init__(self, model_name, budget):

@@ -6,13 +6,12 @@ import {
   Routes,
   Route,
 } from 'react-router-dom';
-import Constants from 'main/utils/Constants';
-import { useEffect, useState } from 'react';
-import Messages from 'main/utils/Messages';
 import icon from '../../assets/icon.svg';
 import './App.css';
 
 import Session from './Session';
+import { useEffect } from 'react';
+const io = require('socket.io-client');
 
 function Hello() {
   const navigate = useNavigate();
@@ -36,11 +35,30 @@ function Hello() {
   );
 }
 
+const socket = io('http://127.0.0.1:5555');
+
+function Loading() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    socket.on('connect', () => {
+      navigate('/hello');
+    });
+  }, []);
+
+  return (
+    <div>
+      <h1>Waiting for server to come up...</h1>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Hello />} />
+        <Route path="/" element={<Loading />} />
+        <Route path="/hello" element={<Hello />} />
         <Route path="/Session" element={<Session />} />
       </Routes>
     </Router>

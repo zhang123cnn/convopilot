@@ -4,6 +4,7 @@ from flask import Flask
 from convopilot.interface import PipelineModule
 
 from convopilot import record_audio
+from convopilot import gpt_api
 
 # This is to pull in dependency for pyinstaller to work
 from engineio.async_drivers import threading
@@ -78,6 +79,22 @@ def handle_stop_recording(message):
 
     emit('stopped', {})
 
+@socketio.on('setup_tokens')
+def handle_setup_tokens(message):
+    data = message['data']
+    openai_key = data.get('openai_key', None)
+
+    if openai_key is None:
+        emit('error', {'message': 'no openai_key provided'})
+        return
+
+    gpt_api.set_api_key(openai_key)
+
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+    emit('connected', {})
 
 def main():
     socketio.run(app, port=5555, allow_unsafe_werkzeug=True)
