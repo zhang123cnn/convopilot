@@ -17,6 +17,7 @@ import { exec } from 'child_process';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import TrayGenerator from './TrayGenerator';
+import fs from 'fs';
 
 class AppUpdater {
   constructor() {
@@ -27,6 +28,30 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+
+const dataPath = path.join(app.getPath('userData'), 'userInput.txt');
+console.log('Data path:', dataPath);
+
+ipcMain.on('save-data', (event, data) => {
+  fs.writeFile(dataPath, JSON.stringify(data), (err: any) => {
+    if (err) {
+      console.error("Error writing to file!", err);
+    }
+    mainWindow?.webContents.send('request-data-reply', data);
+  });
+});
+
+ipcMain.on('request-data', (event, data) => {
+  fs.readFile(dataPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error("Error reading from file!", err);
+      return;
+    }
+    const jsonData = JSON.parse(data);
+    mainWindow?.webContents.send('request-data-reply', jsonData);
+  });
+
+});
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -170,6 +195,8 @@ app
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
+
     });
+
   })
   .catch(console.log);

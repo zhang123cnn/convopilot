@@ -81,6 +81,7 @@ def handle_stop_recording(message):
 
 @socketio.on('setup_tokens')
 def handle_setup_tokens(message):
+    print('Setting up tokens', message)
     data = message['data']
     openai_key = data.get('openai_key', None)
 
@@ -88,7 +89,7 @@ def handle_setup_tokens(message):
         emit('error', {'message': 'no openai_key provided'})
         return
 
-    gpt_api.set_api_key(openai_key)
+    gpt_api.set_openai_key(openai_key)
 
 
 @socketio.on('connect')
@@ -97,6 +98,7 @@ def handle_connect():
     emit('connected', {})
 
 def main():
+    print("Starting server...")
     socketio.run(app, port=5555, allow_unsafe_werkzeug=True)
 
 
