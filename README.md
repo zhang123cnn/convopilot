@@ -9,6 +9,8 @@
 
 ### Installation
 
+- `brew install portaudio`
+- `brew install ffmpeg`
 - `cd app`
 - `npm run dist`
   
