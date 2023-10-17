@@ -7,17 +7,14 @@
 
 ## Getting started (auto)
 
-Run the automatic setup script:
-`./run.sh`
+### Installation
 
-## Getting started (Mac)
-1. make sure you have installed homebrew and python3
-1. brew install portaudio
-    1. If you homebrew is installed in a non-system directory and you are getting error on portaudio.h and clang, make sure you export the c include path and library path as follows
-        1. export C_INCLUDE_PATH=$C_INCLUDE_PATH:[Your local homebrew path]/homebrew/include
-        1. export LIBRARY_PATH=$LIBRARY_PATH:[Your local homebrew path]/homebrew/lib
-1. pip install convopilot
-1. convopilot
+- `cd app`
+- `npm run dist`
+  
+You should find macOS binaries in /app/release/build
+
+- Run ConvoPilot.app
 
 ## Usage
 ### Using GPT-4
