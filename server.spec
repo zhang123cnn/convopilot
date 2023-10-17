@@ -5,7 +5,7 @@ a = Analysis(
     ['convopilot/server.py'],
     pathex=[],
     binaries=[],
-    datas=[('env/lib/python3.11/site-packages/whisper/assets', './whisper/assets')],
+    datas=[('app/env/lib/python3.11/site-packages/whisper/assets', './whisper/assets')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
