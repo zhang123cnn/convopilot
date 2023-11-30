@@ -21,6 +21,7 @@ class PipelineModule(ABC):
             queue.put((data, self.name))
 
     def run(self):
+        self.should_stop = False
         self.onStart()
 
         while not self.should_stop:

@@ -38,3 +38,4 @@ class Pipeline:
     def stop(self):
         self.stop_func()
         self.wait_until_complete()
+        self.threads.clear()
