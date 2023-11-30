@@ -21,6 +21,8 @@ class PipelineModule(ABC):
             queue.put((data, self.name))
 
     def run(self):
+        self.onStart()
+
         while not self.should_stop:
             if (self.input_queue is None):
                 self.process_with_logging([(None, None)])
@@ -32,18 +34,21 @@ class PipelineModule(ABC):
                 data, source = self.input_queue.get()
                 if data is None:
                     hasFinished = True
-                    break
-                items.append((data, source))
+                else:
+                    items.append((data, source))
 
                 if self.input_queue.empty():
                     self.process_with_logging(items)
-                    break;
+                    break
             
             if hasFinished:
                 break
 
         self.output_data(None)
         self.onFinish()
+
+    def onStart(self):
+        pass
 
     def process_with_logging(self, items):
         logging.debug(f'{self.name} - start processing once')

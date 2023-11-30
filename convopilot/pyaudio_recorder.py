@@ -10,15 +10,17 @@ class PyAudioRecorder(PipelineModule):
         self.rate = rate
         self.channels = channels
         self.chunk = chunk
+        self.format = format
 
-        self.stream = self.p.open(format=format, channels=channels, rate=rate,
-                                  input=True, frames_per_buffer=chunk)
+    def onStart(self):
+        self.stream = self.p.open(format=self.format, channels=self.channels, rate=self.rate,
+                                  input=True, frames_per_buffer=self.chunk)
 
     def process(self, items):
         chunk_data = b''
         for _ in range(0, int(self.rate / self.chunk * self.chunk_duration)):
             if self.should_stop:
-                return
+                break
             data_ = self.stream.read(self.chunk)
             chunk_data += data_
 
