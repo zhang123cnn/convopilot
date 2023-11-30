@@ -116,7 +116,7 @@ class CommandKeyListener:
 #    handlers=[logging.StreamHandler()]
 # )
 
-# Starting the listener
-listener = CommandKeyListener()
-print("Listening")
-listener.start()
+if __name__ == '__main__':
+    listener = CommandKeyListener()
+    print("Listening")
+    listener.start()

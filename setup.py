@@ -18,7 +18,8 @@ setup(
     entry_points={
         'console_scripts': [
             'convopilot=convopilot.record_audio:cli',
-            'convopilot-server=convopilot.server:main'
+            'convopilot-server=convopilot.server:main',
+            'voice-keyboard=convopilot.voice_keyboard:main'
         ]
     },
 )
