@@ -3,13 +3,14 @@ import pyaudio
 import pyautogui
 from pynput import keyboard
 import time
+
+import pyperclip
 from convopilot import pipeline
 from convopilot.interface import PipelineModule
 
 from convopilot.module_factory import ModuleFactory
 from convopilot.pyaudio_recorder import PyAudioRecorder
 from convopilot.whisper_transcriber import WhisperAudioTranscriber
-
 
 class KeyboardWriter(PipelineModule):
     def __init__(self, name):
@@ -44,7 +45,11 @@ class KeyboardWriter(PipelineModule):
             print("Clearing", num_to_clear, "characters",
                   self.cur_transcription_data, text)
             pyautogui.press('backspace', presses=num_to_clear)
-            pyautogui.write(text[index:])
+            pyperclip.copy(text[index:])
+            time.sleep(0.1)
+            pyautogui.keyDown('command')
+            pyautogui.press('v')
+            pyautogui.keyUp('command')
 
             if (is_final):
                 self.cur_transcription_data = ""
