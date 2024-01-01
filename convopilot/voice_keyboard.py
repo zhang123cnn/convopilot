@@ -49,14 +49,18 @@ class KeyboardWriter(PipelineModule):
             time.sleep(0.1)
             pyautogui.keyDown('command')
             pyautogui.press('v')
+            time.sleep(0.1)
             pyautogui.keyUp('command')
 
             if (is_final):
+                self.final_transcription_data += self.cur_transcription_data + text
                 self.cur_transcription_data = ""
             else:
                 self.cur_transcription_data = text
 
     def onFinish(self):
+        pyperclip.copy(self.final_transcription_data +
+                       self.cur_transcription_data)
         print("Stopped keyboard writer.")
 
 
@@ -115,11 +119,11 @@ class CommandKeyListener:
             listener.join()
 
 
-# logging.basicConfig(
-#    level=logging.DEBUG,
-#    format='%(asctime)s - %(levelname)s - %(message)s',
-#    handlers=[logging.StreamHandler()]
-# )
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
 
 if __name__ == '__main__':
     listener = CommandKeyListener()
