@@ -61,6 +61,8 @@ class KeyboardWriter(PipelineModule):
     def onFinish(self):
         pyperclip.copy(self.final_transcription_data +
                        self.cur_transcription_data)
+        self.final_transcription_data = ""
+        self.cur_transcription_data = ""
         print("Stopped keyboard writer.")
 
 
@@ -71,7 +73,7 @@ ModuleFactory.register_insight_generator('keyboardWriter', KeyboardWriter)
 
 def buildPipeline():
     audio_recorder = ModuleFactory.create_recorder(
-        'pyaudio', name='pyaudio_recorder', chunk_duration=30, rate=16000,
+        'pyaudio', name='pyaudio_recorder', chunk_duration=600, rate=16000,
         channels=1, chunk=1024, format=pyaudio.paInt16)
 
     audio_transcriber = ModuleFactory.create_transcriber(

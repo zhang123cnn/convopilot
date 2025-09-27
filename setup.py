@@ -1,7 +1,22 @@
 from setuptools import setup, find_packages
+import sys
+sys.setrecursionlimit(5000)
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
+
+APP = ['convopilot/voice_keyboard.py']
+DATA_FILES = []
+OPTIONS = {
+    'argv_emulation': True,
+    'plist': {
+        'CFBundleName': 'Voice Keyboard',
+        'CFBundleDisplayName': 'Voice Keyboard',
+        'CFBundleVersion': '0.2.8',
+        'CFBundleShortVersionString': '0.2.8',
+        'NSHumanReadableCopyright': 'Copyright (c) 2023 Xiaomeng Zhang'
+    }
+}
 
 setup(
     name='convopilot',
@@ -22,4 +37,8 @@ setup(
             'voice-keyboard=convopilot.voice_keyboard:main'
         ]
     },
+    app=APP,
+    data_files=DATA_FILES,
+    options={'py2app': OPTIONS},
+    setup_requires=['py2app'],
 )
